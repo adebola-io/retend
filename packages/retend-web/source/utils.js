@@ -1,5 +1,5 @@
 /** @import { JsxElement } from './dom-renderer.js'; */
-import { AsyncCell, Cell, useAwait } from 'retend';
+import { AsyncCell, Block, Cell, useAwait } from 'retend';
 
 /** @import { DOMRenderer } from './dom-renderer.js'; */
 import { ShadowRootFragment } from './dom-ops.js';
@@ -437,6 +437,7 @@ export function normalizeClassValue(val, element) {
       setClasses(newValue, this);
     }
 
+    addCellListener(element, val, applyValue, false);
     const value = val.get();
     if (value instanceof Promise) {
       value.then((resolvedValue) => {
@@ -446,7 +447,6 @@ export function normalizeClassValue(val, element) {
       return '';
     }
     currentClassToken = normalizeClassValue(value, element);
-    addCellListener(element, val, applyValue, false);
     return currentClassToken;
   }
 
@@ -801,6 +801,8 @@ export function containerIsDynamic(tagname, props, childChecker) {
 export function isReactiveChild(value) {
   if (Cell.isCell(value)) return true;
   if (value instanceof DeferredHandleSymbol) return true;
+  if (value instanceof Block) return value.kind !== 0;
+  if (typeof value === 'function') return true;
   // @ts-expect-error
   if (value instanceof Text && value.__isReactive) return true;
   if (Array.isArray(value)) {

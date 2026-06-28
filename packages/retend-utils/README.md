@@ -15,6 +15,7 @@ This package provides a collection of utility hooks and components for [Retend](
     - [`useLocalStorage`](#uselocalstorage)
     - [`useSessionStorage`](#usesessionstorage)
     - [`useDerivedValue`](#usederivedvalue)
+    - [`useDerivedAsyncValue`](#usederivedasyncvalue)
     - [`useMatchMedia`](#usematchmedia)
     - [`useCursorPosition`](#usecursorposition)
   - [Components](#components)
@@ -266,6 +267,39 @@ function ExampleComponent(props) {
 }
 ```
 
+### `useDerivedAsyncValue`
+
+Creates an async derived cell from a static value, a synchronous cell, or an async cell. The returned cell resolves async cells through Retend's async derivation flow, tracks synchronous cells, or resolves to a constant for static values.
+
+Parameters:
+
+- `property` (AsyncCell<T> | Cell<T> | T): The input value or cell to derive from
+
+Returns:
+
+- `AsyncDerivedCell<T>`: An async derived cell that reflects the current value of the input
+
+Example:
+
+```tsx
+import { Cell } from 'retend';
+import { useDerivedAsyncValue } from 'retend-utils/hooks';
+
+function ExampleComponent(props) {
+  const { valueOrCell } = props;
+  const derivedValue = useDerivedAsyncValue(valueOrCell);
+
+  return <p>Current value: {derivedValue}</p>;
+}
+
+const asyncValue = Cell.derivedAsync(async () => fetchValue());
+
+// Can be used with static values, synchronous cells, or async cells:
+<ExampleComponent valueOrCell="static" />
+<ExampleComponent valueOrCell={Cell.source('reactive')} />
+<ExampleComponent valueOrCell={asyncValue} />
+```
+
 ### `useMatchMedia`
 
 Creates a reactive cell that tracks the result of a media query.
@@ -433,6 +467,11 @@ Parameters:
   - `transitionTimingFunction`: Optional. The easing function for the transition (e.g., `'ease-in-out'`). Default: `'ease'`.
   - `maintainWidthDuringTransition`: Optional. If true, disables horizontal scaling during transitions.
   - `maintainHeightDuringTransition`: Optional. If true, disables vertical scaling during transitions.
+  - `topLayer`: Optional. If true, places the children in the browser top layer during transitions.
+  - `onStart`: Optional. Called once when a transition starts.
+  - `onEnd`: Optional. Called once when a transition ends.
+
+Generated transition styles are inserted before existing adopted styles, so app-level adopted styles can override them when needed.
 
 Returns:
 

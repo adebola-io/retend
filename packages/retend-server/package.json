@@ -1,13 +1,13 @@
 {
   "name": "retend-server",
-  "version": "0.0.29",
+  "version": "0.0.31",
   "private": false,
   "description": "Static site generation for the retend UI framework.",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/client-only.d.ts",
-      "import": "./dist/client-only.js"
+      "types": "./dist/client-boundaries.d.ts",
+      "import": "./dist/client-boundaries.js"
     },
     "./server": {
       "types": "./dist/server.d.ts",

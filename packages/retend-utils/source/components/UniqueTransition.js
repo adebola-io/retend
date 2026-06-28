@@ -24,6 +24,10 @@ import { DOMRenderer } from 'retend-web';
  * @property {string} [transformOrigin] The transform origin used during the transition.
  * @property {boolean} [maintainWidthDuringTransition] If true, disables horizontal scaling during transitions.
  * @property {boolean} [maintainHeightDuringTransition] If true, disables vertical scaling during transitions.
+ * @property {boolean} [respectParentTransform] If false, ignores parent animations and transforms during transitions.
+ * @property {boolean} [topLayer] If true, the children are placed in the top layer during transitions.
+ * @property {() => void} [onStart] Called when the transition starts.
+ * @property {() => void} [onEnd] Called when the transition ends.
  */
 
 /**
@@ -52,47 +56,34 @@ function getInitialRelativeTransform(from, to, options = {}) {
   return `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
 }
 
-const IS_DYNAMIC_CSS_EXPR = /(--)|(^calc\()/;
-
 /**
  *
  * @param {string | undefined} transitionDuration
- * @param {string | undefined} transitionTimingFunction
  * @param {HTMLElement} element
  */
-function parseTransitionOptions(
-  transitionDuration,
-  transitionTimingFunction,
-  element
-) {
+function parseTransitionDuration(transitionDuration, element) {
   let duration = 0;
-  let easing = transitionTimingFunction ?? 'ease';
 
-  if (!transitionDuration) return { duration, easing };
-
-  if (!transitionDuration.endsWith('s') || IS_DYNAMIC_CSS_EXPR.test(easing)) {
+  if (!transitionDuration) return duration;
+  if (!transitionDuration.endsWith('s')) {
     const durationVar = '--unique-transition-duration';
-    const easingVar = '--unique-transition-easing';
-
     // Allows us to dynamically resolve the duration, so
     // calc() or css vars can be passed in.
     element.style.setProperty(durationVar, transitionDuration);
-    element.style.setProperty(easingVar, easing);
-
     const styles = getComputedStyle(element);
     const durationRaw = styles.getPropertyValue(durationVar);
     duration = durationRaw.endsWith('ms')
       ? Number(durationRaw.slice(0, -2))
       : Number(durationRaw.slice(0, -1)) * 1000;
 
-    easing = styles.getPropertyValue(easingVar);
+    element.style.removeProperty(durationVar);
   } else {
     duration = transitionDuration.endsWith('ms')
       ? Number(transitionDuration.slice(0, -2))
       : Number(transitionDuration.slice(0, -1)) * 1000;
   }
 
-  return { duration, easing };
+  return duration;
 }
 
 /**
@@ -156,11 +147,15 @@ function saveState(handle) {
  */
 function restoreTransition(elementState, handle, options) {
   const {
-    transitionDuration,
-    transitionTimingFunction,
-    transformOrigin = 'top left',
-    maintainWidthDuringTransition,
-    maintainHeightDuringTransition,
+    transitionDuration = '200ms',
+    transitionTimingFunction = 'ease',
+    transformOrigin: origin = 'top left',
+    maintainWidthDuringTransition: maintainWidth,
+    maintainHeightDuringTransition: maintainHeight,
+    respectParentTransform = true,
+    topLayer,
+    onStart,
+    onEnd,
   } = options;
   const elements = getHandleElements(handle);
   if (!elements.length) return;
@@ -174,113 +169,170 @@ function restoreTransition(elementState, handle, options) {
   }
   if (!anchor) return;
 
-  const { rects, animationState, transitions } = elementState;
+  const { rects } = elementState;
 
   requestAnimationFrame(() => {
-    const newAnimations = elements.flatMap((element) => {
-      return element.getAnimations({ subtree: true });
-    });
-
-    for (const newAnimation of newAnimations) {
-      if (!(newAnimation instanceof CSSAnimation)) continue;
-
-      const savedState = animationState.find((s) => {
-        if (!(newAnimation.effect instanceof KeyframeEffect)) return false;
-        return (
-          s.animationName === newAnimation.animationName &&
-          s.target === newAnimation.effect.target
-        );
-      });
-      if (savedState) {
-        newAnimation.currentTime = savedState.currentTime;
-      }
-    }
-
-    for (const transition of transitions) {
-      if (
-        !(transition.effect instanceof KeyframeEffect) ||
-        !transition.effect.target
-      ) {
-        continue;
-      }
-      const target = transition.effect.target;
-      target.animate(
-        transition.effect.getKeyframes(),
-        transition.effect.getTiming()
-      );
-    }
+    restoreSubtreeAnimationsAndTransitions(elements, elementState);
   });
 
-  const transition = parseTransitionOptions(
-    transitionDuration,
-    transitionTimingFunction,
-    anchor
-  );
+  const duration = parseTransitionDuration(transitionDuration, anchor);
 
   // Animations on ancestors of the target may modify the positioning
   // of the target element, making the bounding rect incorrect.
   // We need to recompute the new rect after all parent animations
   // have been scrubbed to the expected point on the document timeline.
-  const parentAnimations = [
-    ...new Set(elements.flatMap((element) => getAllParentAnimations(element))),
-  ];
+  const parentAnimations = respectParentTransform
+    ? [...new Set(elements.flatMap(getAllParentAnimations))]
+    : [];
   for (const animation of parentAnimations) {
     const currentTime = Number(animation.currentTime);
-    animation.currentTime = currentTime + transition.duration;
+    animation.currentTime = currentTime + duration;
   }
 
-  requestAnimationFrame(() => {
+  requestAnimationFrame(async () => {
     const nextRects = new Map();
     for (const element of elements) {
       nextRects.set(element, element.getBoundingClientRect());
     }
     for (const anim of parentAnimations) {
-      anim.currentTime = Number(anim.currentTime) - transition.duration;
+      anim.currentTime = Number(anim.currentTime) - duration;
     }
+    let cssText = '';
+    /** @type {Promise<Animation>[]} */
+    const finishedAnimations = [];
+    /** @type {Map<Element, string>} */
+    const transitionIds = new Map();
+    const stylesheet = new CSSStyleSheet();
+
     for (const element of elements) {
       const oldRect = rects.get(element);
       if (!oldRect) continue;
       const newRect = nextRects.get(element);
       if (!newRect) continue;
-      if (newRect.width === 0 && !maintainWidthDuringTransition) continue;
-      if (newRect.height === 0 && !maintainHeightDuringTransition) continue;
+      if (newRect.width === 0 && !maintainWidth) continue;
+      if (newRect.height === 0 && !maintainHeight) continue;
 
-      const parentTransform = getParentTransformMatrix(element);
+      const parentTransform = respectParentTransform
+        ? getParentTransformMatrix(element)
+        : new DOMMatrix();
       const isInvertible =
+        respectParentTransform &&
         Math.abs(
           parentTransform.a * parentTransform.d -
             parentTransform.b * parentTransform.c
         ) > 1e-10;
-      const displacement = getInitialRelativeTransform(oldRect, newRect, {
-        maintainWidth: maintainWidthDuringTransition,
-        maintainHeight: maintainHeightDuringTransition,
-      });
-      let initialTransform = displacement;
-      if (isInvertible) {
-        initialTransform = `${parentTransform.inverse().toString()} ${displacement}`;
+      const options = { maintainWidth, maintainHeight };
+      const transform = getInitialRelativeTransform(oldRect, newRect, options);
+      const initTransform = isInvertible
+        ? `${parentTransform.inverse().toString()} ${transform}`
+        : transform;
+      const id = crypto.randomUUID();
+      transitionIds.set(element, id);
+      cssText += `
+[data-transitioning="${id}"] {
+  transform-origin:${origin};
+  animation: animate-${id} ${transitionDuration} ${transitionTimingFunction} backwards !important;
+}
+[data-transitioning="${id}"][data-top-layer] {
+  width:${newRect.width}px !important;
+  height:${newRect.height}px !important;
+  top:${newRect.top}px !important;
+  left:${newRect.left}px !important;
+}
+:where([data-transitioning="${id}"]) {
+  background-color:transparent;
+  color:inherit;
+  overflow:visible;
+  margin:0;
+  border:0;
+  padding:0;
+}
+@keyframes animate-${id} {
+  from { transform: ${initTransform}; }
+  to { transform: none; }
+}`;
+    }
+
+    if (transitionIds.size) {
+      stylesheet.replaceSync(cssText);
+      const stylesheets = [stylesheet, ...document.adoptedStyleSheets];
+      document.adoptedStyleSheets = stylesheets;
+    }
+
+    for (const [element, id] of transitionIds) {
+      element.setAttribute('data-transitioning', id);
+      if (topLayer && element instanceof HTMLElement) {
+        if (element.hasAttribute('popover')) elementCannotBePromoted();
+        else {
+          element.setAttribute('popover', 'manual');
+          element.setAttribute('data-top-layer', 'true');
+          element.showPopover();
+        }
       }
 
-      if (element instanceof HTMLElement) {
-        element.style.setProperty('transform', initialTransform);
-        element.style.setProperty('transform-origin', transformOrigin);
-      }
-      element.setAttribute('data-transitioning', '');
-      const animation = element.animate(
-        { transform: [initialTransform, 'none'] },
-        transition
-      );
-      if (element instanceof HTMLElement) {
-        element.style.removeProperty('transform');
-      }
-      animation.finished.finally(() => {
+      const [animation] = element.getAnimations(); // guaranteed to be the correct animation
+      if (!animation) continue;
+      const animationFinished = animation.finished.finally(() => {
         animation.cancel();
         element.removeAttribute('data-transitioning');
-        if (element instanceof HTMLElement) {
-          element.style.removeProperty('transform-origin');
+        if (topLayer && element.hasAttribute('data-top-layer')) {
+          element.removeAttribute('data-top-layer');
+          element.removeAttribute('popover');
         }
       });
+
+      finishedAnimations.push(animationFinished);
     }
+
+    onStart?.();
+    await Promise.allSettled(finishedAnimations);
+    document.adoptedStyleSheets = document.adoptedStyleSheets.filter((s) => {
+      return s !== stylesheet;
+    });
+    onEnd?.();
   });
+}
+
+const elementCannotBePromoted = () => {
+  console.error(
+    '[UniqueTransition] Popover elements cannot be promoted during unique transitions.'
+  );
+};
+
+/**
+ * @param {Element[]} elements
+ * @param {ElementUIState} elementState
+ */
+function restoreSubtreeAnimationsAndTransitions(elements, elementState) {
+  const { animationState, transitions } = elementState;
+
+  const newAnimations = elements.flatMap((element) => {
+    return element.getAnimations({ subtree: true });
+  });
+
+  for (const newAnimation of newAnimations) {
+    if (!(newAnimation instanceof CSSAnimation)) continue;
+
+    const savedState = animationState.find((s) => {
+      if (!(newAnimation.effect instanceof KeyframeEffect)) return false;
+      return (
+        s.animationName === newAnimation.animationName &&
+        s.target === newAnimation.effect.target
+      );
+    });
+    if (savedState) newAnimation.currentTime = savedState.currentTime;
+  }
+
+  for (const transition of transitions) {
+    if (!(transition.effect instanceof KeyframeEffect)) continue;
+    if (!transition.effect.target) continue;
+
+    const target = transition.effect.target;
+    target.animate(
+      transition.effect.getKeyframes(),
+      transition.effect.getTiming()
+    );
+  }
 }
 
 /**

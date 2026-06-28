@@ -84,7 +84,7 @@ export class Router extends EventTarget {
   #history = [];
   /** @type {RouterMiddleware[]} */
   #middlewares;
-  #maxRedirects = 100;
+  #maxRedirects;
   /** @type {RouterInternalState} */
   #internalState;
 
@@ -107,7 +107,7 @@ export class Router extends EventTarget {
     super();
     this.#routeTree = RouteTree.fromRouteRecords(routeOptions.routes);
     this.#stackMode = routeOptions.stackMode ?? false;
-    this.#maxRedirects = routeOptions.maxRedirects ?? 0;
+    this.#maxRedirects = routeOptions.maxRedirects ?? 100;
     this.useViewTransitions = routeOptions.useViewTransitions ?? false;
     this.#middlewares = routeOptions.middlewares ?? [];
     this.#internalState = { metadata: new Map(), routeChain: Cell.source([]) };
@@ -205,7 +205,7 @@ export class Router extends EventTarget {
       if (middlewareResponse instanceof RouterMiddlewareResponse) {
         if (middlewareResponse.type === 'redirect') {
           // Block deep redirects
-          if (this.#redirectStackCount > this.#maxRedirects) {
+          if (this.#redirectStackCount >= this.#maxRedirects) {
             const message = `Your router redirected too many times (${
               this.#maxRedirects
             }). This is probably due to a circular redirect in your route configuration.`;
@@ -218,10 +218,15 @@ export class Router extends EventTarget {
             continue;
           }
           this.#redirectStackCount++;
+          const nextMatchResult = await this.#routeTree.match(
+            middlewareResponse.path
+          );
+          const nextTargetMatch = nextMatchResult.leaf();
+          if (nextTargetMatch === null) return middlewareResponse.path;
           return this.#runMiddlewares(
             middlewareResponse.path,
-            matchResult,
-            targetMatch,
+            nextMatchResult,
+            nextTargetMatch,
             workingPath
           );
         }
@@ -559,7 +564,7 @@ export class Router extends EventTarget {
     if (!this.#assertNotLocked(path)) return;
     this.#isNavigating = true;
     try {
-      await this.#load({ rawPath: path, replace: true });
+      await this.#load({ rawPath: path, navigate: true, replace: true });
     } finally {
       this.#isNavigating = false;
     }
@@ -572,13 +577,25 @@ export class Router extends EventTarget {
     this.#isNavigating = true;
     try {
       const oldHistoryLength = this.#history.length;
-      this.#history.pop();
+      const currentPath = this.#history.pop();
+      const restoreCurrentPath = () => {
+        if (
+          currentPath &&
+          this.#currentPath.get().fullPath === currentPath &&
+          this.#history.at(-1) !== currentPath
+        ) {
+          this.#history.push(currentPath);
+        }
+      };
       /** @type {string[]} */
       const transitionTypes = [];
 
       const callback = async () => {
         const wasLoaded = await this.#update(lastPath, false, transitionTypes);
-        if (!wasLoaded) return;
+        if (!wasLoaded) {
+          restoreCurrentPath();
+          return;
+        }
         const event = new RouteLoadCompletedEvent({
           fullPath: this.#currentPath.get().fullPath,
           oldHistoryLength,
@@ -588,7 +605,12 @@ export class Router extends EventTarget {
         });
         this.dispatchEvent(event);
       };
-      await this.#startTransition(callback, transitionTypes);
+      try {
+        await this.#startTransition(callback, transitionTypes);
+      } catch (error) {
+        restoreCurrentPath();
+        throw error;
+      }
     } finally {
       this.#isNavigating = false;
     }
@@ -628,9 +650,12 @@ export class Router extends EventTarget {
     if (this.#isNavigating) return;
     const window = /** @type {Window} */ (event.currentTarget);
     this.#isNavigating = true;
-    const path = getFullPath(window);
-    await this.#load({ rawPath: path, navigate: false });
-    this.#isNavigating = false;
+    try {
+      const path = getFullPath(window);
+      await this.#load({ rawPath: path, navigate: false });
+    } finally {
+      this.#isNavigating = false;
+    }
   };
 
   /** @param {Window} window */

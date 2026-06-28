@@ -2,7 +2,16 @@ import type { Cell } from 'retend';
 
 import { If } from 'retend';
 
-export function MobileMenuButton(props: { toggle: () => void }) {
+interface MobileMenuButtonProps {
+  toggle: () => void;
+}
+
+interface MobileOverlayProps {
+  isOpen: Cell<boolean>;
+  toggle: () => void;
+}
+
+export function MobileMenuButton(props: MobileMenuButtonProps) {
   const { toggle } = props;
 
   return (
@@ -35,22 +44,17 @@ export function MobileMenuButton(props: { toggle: () => void }) {
   );
 }
 
-export function MobileOverlay(props: {
-  isOpen: Cell<boolean>;
-  toggle: () => void;
-}) {
+export function MobileOverlay(props: MobileOverlayProps) {
   const { isOpen, toggle } = props;
 
   return (
     <>
-      {If(isOpen, {
-        true: () => (
-          <div
-            class="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            onClick={toggle}
-          />
-        ),
-      })}
+      {If(isOpen, () => (
+        <div
+          class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={toggle}
+        />
+      ))}
     </>
   );
 }
