@@ -20,6 +20,7 @@ const rules = {
   'retend/no-manual-async-state': 'error',
   'retend/no-module-jsx': 'error',
   'retend/no-provider-inline-object-value': 'error',
+  'retend/no-query-selector-in-component': 'error',
   'retend/no-raw-ref-callback': 'error',
   'retend/no-react-imports': 'error',
   'retend/no-templated-class': 'error',

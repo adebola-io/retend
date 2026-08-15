@@ -1,6 +1,6 @@
 import type { JSX } from 'retend/jsx-runtime';
 
-import { Cell, onSetup } from 'retend';
+import { Cell, onConnected } from 'retend';
 import { useCurrentRoute } from 'retend/router';
 
 type HeadingProps =
@@ -19,17 +19,15 @@ export function NavigableHeading(props: NavigableHeadingProps) {
   const ref = Cell.source<HTMLElement | null>(null);
   const hash = Cell.derived(() => route.get().hash);
 
-  const scrollIntoView = () => {
-    const selector = hash.get();
-    if (!selector) return;
-    const heading = document.querySelector(selector);
-    if (heading && heading === ref.get()) {
+  const scrollIntoView = (heading: HTMLElement | null) => {
+    const headingId = hash.get();
+    if (headingId && heading?.id === headingId) {
       heading.scrollIntoView();
     }
   };
 
-  hash.listen(scrollIntoView);
-  onSetup(scrollIntoView);
+  hash.listen(() => scrollIntoView(ref.peek()));
+  onConnected(ref, scrollIntoView);
 
   if (as === 'h2') {
     return (

@@ -2794,6 +2794,57 @@ const preferOnconnectedForRefDomUse = {
   },
 };
 
+const noQuerySelectorInComponent = {
+  meta: {
+    docs: {
+      description: 'disallow DOM selector queries inside Retend components',
+    },
+    schema: [],
+    messages: {
+      unexpected:
+        'Do not query the document or component subtree with `querySelector()` inside a Retend component. Use a ref Cell and `onConnected(ref, (element) => { ... })` for DOM access.',
+    },
+  },
+  createOnce(context) {
+    return {
+      Program(node) {
+        for (const component of getTopLevelJsxComponents(node)) {
+          walkTree(component.body, (current) => {
+            if (current.type !== 'CallExpression') {
+              return true;
+            }
+
+            if (current.callee.type !== 'MemberExpression') {
+              return true;
+            }
+
+            if (current.callee.computed) {
+              return true;
+            }
+
+            if (current.callee.property.type !== 'Identifier') {
+              return true;
+            }
+
+            if (
+              current.callee.property.name !== 'querySelector' &&
+              current.callee.property.name !== 'querySelectorAll'
+            ) {
+              return true;
+            }
+
+            context.report({
+              node: current.callee.property,
+              messageId: 'unexpected',
+            });
+            return true;
+          });
+        }
+      },
+    };
+  },
+};
+
 const noRawRefCallback = {
   meta: {
     docs: {
@@ -3012,6 +3063,7 @@ const plugin = {
     'no-jsx-map': noJsxMap,
     'no-listen-in-onsetup': noListenInOnSetup,
     'no-provider-inline-object-value': noProviderInlineObjectValue,
+    'no-query-selector-in-component': noQuerySelectorInComponent,
     'no-raw-ref-callback': noRawRefCallback,
     'no-react-imports': noReactImports,
     'prefer-batch-set': preferBatchSet,

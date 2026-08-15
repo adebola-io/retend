@@ -242,6 +242,110 @@ test('no-cell-type-alias allows direct Cell type imports', () => {
   assert.equal(reports.length, 0);
 });
 
+test('no-query-selector-in-component reports querySelector in a JSX component', () => {
+  const reports = runVisitor(
+    'no-query-selector-in-component',
+    'Program',
+    programWithComponent([
+      expressionStatement(
+        call(member('document', 'querySelector'), [
+          { type: 'Literal', value: '.dialog' },
+        ])
+      ),
+    ])
+  );
+
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].messageId, 'unexpected');
+});
+
+test('no-query-selector-in-component reports querySelectorAll in a nested component handler', () => {
+  const reports = runVisitor(
+    'no-query-selector-in-component',
+    'Program',
+    programWithComponent([
+      {
+        type: 'VariableDeclaration',
+        kind: 'const',
+        declarations: [
+          {
+            type: 'VariableDeclarator',
+            id: identifier('handleClick'),
+            init: {
+              type: 'ArrowFunctionExpression',
+              params: [],
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  expressionStatement(
+                    call(member('element', 'querySelectorAll'), [
+                      { type: 'Literal', value: '[data-item]' },
+                    ])
+                  ),
+                ],
+              },
+            },
+          },
+        ],
+      },
+    ])
+  );
+
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].messageId, 'unexpected');
+});
+
+test('no-query-selector-in-component allows querySelector in a utility function', () => {
+  const reports = runVisitor('no-query-selector-in-component', 'Program', {
+    type: 'Program',
+    body: [
+      {
+        type: 'FunctionDeclaration',
+        id: identifier('findDialog'),
+        params: [],
+        body: {
+          type: 'BlockStatement',
+          body: [
+            {
+              type: 'ReturnStatement',
+              argument: call(member('document', 'querySelector'), [
+                { type: 'Literal', value: '.dialog' },
+              ]),
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  assert.equal(reports.length, 0);
+});
+
+test('no-query-selector-in-component allows querySelector in an uppercase function without JSX', () => {
+  const reports = runVisitor('no-query-selector-in-component', 'Program', {
+    type: 'Program',
+    body: [
+      {
+        type: 'FunctionDeclaration',
+        id: identifier('FindDialog'),
+        params: [],
+        body: {
+          type: 'BlockStatement',
+          body: [
+            expressionStatement(
+              call(member('document', 'querySelector'), [
+                { type: 'Literal', value: '.dialog' },
+              ])
+            ),
+          ],
+        },
+      },
+    ],
+  });
+
+  assert.equal(reports.length, 0);
+});
+
 test('prefer-cell-task reports try catch finally with loading state', () => {
   const reports = runVisitor(
     'prefer-cell-task',
