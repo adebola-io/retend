@@ -108,23 +108,21 @@ export async function resolveComponentName(
   const cached = nameCache.get(node);
   if (cached) return cached;
 
-  const componentName = node.component.name;
-  if (componentName) {
-    const isAnonymousUnique =
-      componentName === 'Unique.Content' &&
-      Reflect.get(node.component, '__retendUnique');
-    if (!isAnonymousUnique) {
-      nameCache.set(node, componentName);
-      return componentName;
-    }
-  }
-
   if (node.fileData) {
     const resolved = await resolveFromSource(node.fileData, sourceCache);
     if (resolved) {
       nameCache.set(node, resolved);
       return resolved;
     }
+  }
+
+  const componentName = node.component.name;
+  const isAnonymousUnique =
+    componentName === 'Unique.Content' &&
+    Reflect.get(node.component, '__retendUnique');
+  if (componentName && !isAnonymousUnique) {
+    nameCache.set(node, componentName);
+    return componentName;
   }
 
   return '[Anonymous]';
