@@ -7,6 +7,7 @@ const rules = {
   'retend/no-cell-mutation-without-set': 'error',
   'retend/no-cell-set-in-derived': 'error',
   'retend/no-cell-type-alias': 'error',
+  'retend/no-source-cell-props': 'error',
   'retend/no-classname': 'error',
   'retend/no-derived-in-jsx': 'error',
   'retend/no-get-in-derived-async': 'error',

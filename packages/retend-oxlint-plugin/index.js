@@ -2197,6 +2197,60 @@ const noGetInDerivedAsync = {
   },
 };
 
+const noSourceCellProps = {
+  meta: {
+    docs: {
+      description: 'disallow SourceCell in component prop types',
+    },
+    schema: [],
+    messages: {
+      unexpected:
+        '`SourceCell` should not be exposed through component props. A `SourceCell` represents ownership of mutable state; keep that ownership in the component that owns the source cell. Accept `Cell<T>` instead so the child can observe the value without mutating it, and flow requested mutations back to the owner through an event or callback.',
+    },
+  },
+  createOnce(context) {
+    const checkMembers = (name, members) => {
+      if (!name.endsWith('Props')) {
+        return;
+      }
+
+      for (const member of members) {
+        if (member.type !== 'TSPropertySignature') {
+          continue;
+        }
+
+        const type = member.typeAnnotation?.typeAnnotation;
+        if (type?.type !== 'TSTypeReference') {
+          continue;
+        }
+
+        if (type.typeName.type !== 'Identifier') {
+          continue;
+        }
+
+        if (type.typeName.name !== 'SourceCell') {
+          continue;
+        }
+
+        context.report({ node: type, messageId: 'unexpected' });
+      }
+    };
+
+    return {
+      TSInterfaceDeclaration(node) {
+        checkMembers(node.id.name, node.body.body);
+      },
+      TSTypeAliasDeclaration(node) {
+        if (node.typeAnnotation.type !== 'TSTypeLiteral') {
+          return;
+        }
+
+        checkMembers(node.id.name, node.typeAnnotation.members);
+      },
+    };
+  },
+};
+
 const noCellTypeAlias = {
   meta: {
     docs: {
@@ -3046,6 +3100,7 @@ const plugin = {
     'no-cell-mutation-without-set': noCellMutationWithoutSet,
     'no-cell-set-in-derived': noCellSetInDerived,
     'no-cell-type-alias': noCellTypeAlias,
+    'no-source-cell-props': noSourceCellProps,
     'no-classname': noClassName,
     'no-inline-object-type': noInlineObjectType,
     'no-module-cell': noModuleCell,

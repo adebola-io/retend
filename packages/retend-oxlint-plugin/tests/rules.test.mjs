@@ -207,6 +207,85 @@ function programWithComponent(body) {
   };
 }
 
+function sourceCellType() {
+  return {
+    type: 'TSTypeReference',
+    typeName: identifier('SourceCell'),
+  };
+}
+
+function cellType() {
+  return {
+    type: 'TSTypeReference',
+    typeName: identifier('Cell'),
+  };
+}
+
+function propertySignature(name, typeAnnotation) {
+  return {
+    type: 'TSPropertySignature',
+    key: identifier(name),
+    typeAnnotation: {
+      type: 'TSTypeAnnotation',
+      typeAnnotation,
+    },
+  };
+}
+
+test('no-source-cell-props reports SourceCell properties on Props interfaces', () => {
+  const reports = runVisitor('no-source-cell-props', 'TSInterfaceDeclaration', {
+    type: 'TSInterfaceDeclaration',
+    id: identifier('EditorProps'),
+    body: {
+      type: 'TSInterfaceBody',
+      body: [propertySignature('value', sourceCellType())],
+    },
+  });
+
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].messageId, 'unexpected');
+});
+
+test('no-source-cell-props reports SourceCell properties on Props type aliases', () => {
+  const reports = runVisitor('no-source-cell-props', 'TSTypeAliasDeclaration', {
+    type: 'TSTypeAliasDeclaration',
+    id: identifier('SliderProps'),
+    typeAnnotation: {
+      type: 'TSTypeLiteral',
+      members: [propertySignature('value', sourceCellType())],
+    },
+  });
+
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].messageId, 'unexpected');
+});
+
+test('no-source-cell-props allows Cell properties on Props declarations', () => {
+  const reports = runVisitor('no-source-cell-props', 'TSInterfaceDeclaration', {
+    type: 'TSInterfaceDeclaration',
+    id: identifier('EditorProps'),
+    body: {
+      type: 'TSInterfaceBody',
+      body: [propertySignature('value', cellType())],
+    },
+  });
+
+  assert.equal(reports.length, 0);
+});
+
+test('no-source-cell-props ignores SourceCell properties outside Props declarations', () => {
+  const reports = runVisitor('no-source-cell-props', 'TSInterfaceDeclaration', {
+    type: 'TSInterfaceDeclaration',
+    id: identifier('EditorState'),
+    body: {
+      type: 'TSInterfaceBody',
+      body: [propertySignature('value', sourceCellType())],
+    },
+  });
+
+  assert.equal(reports.length, 0);
+});
+
 test('no-cell-type-alias reports aliased Cell type imports', () => {
   const reports = runVisitor('no-cell-type-alias', 'ImportDeclaration', {
     type: 'ImportDeclaration',
