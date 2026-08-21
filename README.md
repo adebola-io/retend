@@ -4,30 +4,31 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/resuite/retend)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**A universal, renderer-agnostic reactive framework for building fluid user interfaces.**
+**A renderer-independent reactive framework for building user interfaces.**
 
-> ⚠️ **Alpha Software**: Retend is currently in early development and not recommended for production use.
+> Retend is alpha software. APIs may change before the first stable release.
 
-Retend is a modern reactive framework that uses JSX to construct dynamic interfaces on _any_ platform. Unlike traditional frameworks, Retend components run exactly once—there is no Virtual DOM, no diffing phase, and no component re-renders.
+Retend uses JSX and reactive [`Cell`](https://github.com/adebola-io/cells) values to build interfaces for a chosen host environment. The core does not depend on the browser or the DOM. Instead, a renderer implements the operations needed to create nodes, set properties, insert content, and update existing output.
 
-Instead, Retend acts as an orchestration engine between its reactive primitive (`Cell`) and a pluggable `Renderer` interface, ensuring that state changes translate instantly to precise node updates in the target environment.
+Component functions run when their instances are mounted. Retend does not re-run an entire component tree when state changes. It tracks the reactive values used by each binding and updates the affected output directly. Dynamic collections use the renderer’s reconciliation API when their contents change.
 
-## Core Concepts
+## Core concepts
 
-- **Renderer-Agnostic Engine**: The core reactivity and JSX transform (`retend`) have zero knowledge of the browser. You configure a `Renderer` interface (like `DOMRenderer` for the web, or a custom one for Canvas, Terminal, or Mobile) to map universal instructions to platform-specific nodes.
-- **Run-Once Components**: Components are not diffed or reconciled. They execute exactly once to establish reactive bindings between state and the active renderer.
-- **Surgical Reactivity**: Built around [`@adbl/cells`](https://github.com/adebola-io/cells), dependencies are automatically tracked. State changes directly command the renderer to update only the specific nodes that changed.
-- **Batteries Included**: Despite being renderer-agnostic, the core library ships with universal primitives like a programmatic router, control flow components (`If`, `For`, `Switch`), and robust scope context injection.
+- **Renderer-independent core**: `retend` contains the JSX runtime, reactive bindings, control-flow helpers, routing, and renderer interfaces. A renderer maps those operations to a host environment such as the DOM or a server-side representation.
+- **One-time component setup**: A component function runs to create its output and establish its reactive bindings. Later state changes update those bindings instead of re-running the component.
+- **Fine-grained updates**: Changes to a `Cell` notify only the bindings that depend on it. The renderer then updates the corresponding text, property, attribute, or collection.
+- **Built-in primitives**: The core includes `If`, `For`, and `Switch` for conditional and list rendering, as well as a programmatic router and scope-based context utilities.
 
-## At a Glance
+## At a glance
 
-Your application logic and JSX are completely decoupled from the platform:
+Application code can be written independently of the output platform:
 
 ```tsx
 import { Cell } from 'retend';
 
 const App = () => {
   const count = Cell.source(0);
+
   return (
     <button type="button" onClick={() => count.set(count.get() + 1)}>
       Count: {count}
@@ -36,44 +37,39 @@ const App = () => {
 };
 ```
 
-To display it, simply pass the component tree to your environment's specific renderer:
+For a browser application, use the DOM renderer’s `renderToDOM` helper to mount the component:
 
 ```tsx
-import { DOMRenderer, setActiveRenderer } from 'retend-web';
+import { renderToDOM } from 'retend-web';
 
-const renderer = new DOMRenderer(window);
-setActiveRenderer(renderer);
-
-const rootNode = renderer.render(<App />);
-
-document.getElementById('app')!.append(rootNode);
+renderToDOM(document.getElementById('app')!, App);
 ```
 
-_(Note: `retend-web` provides a `renderToDOM` helper to simplify this for browser projects!)_
+If you need to control the renderer directly, `retend-web` also exports `DOMRenderer`. Other renderers can implement the core `Renderer` interface for different host environments.
 
-## Quick Start
+## Quick start
 
-The fastest way to scaffold a browser project is using our CLI:
+Scaffold a browser project with the CLI:
 
 ```bash
-npx retend-start@latest my-app
+pnpm dlx retend-start@latest my-app
 cd my-app
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
-_CLI Options: `--tailwind`, `--ssg`, `--javascript`, `--docs`, `--default`_
+CLI options include `--tailwind`, `--ssg`, `--javascript`, `--docs`, and `--default`.
 
-## Package Ecosystem
+## Package ecosystem
 
-Retend's architecture is split to enforce separation of concerns:
+The project is split into packages with separate responsibilities:
 
-- **`retend`**: The universal core library (reactivity, JSX, control flow, routing).
-- **`retend-web`**: The official DOM renderer implementation for browser applications.
-- **`retend-server`**: Server-side rendering (SSR) and static site generation (SSG) implementations.
-- **`retend-start`**: CLI tool for scaffolding new projects.
-- **`retend-utils`**: Utility functions and universal hooks.
-- **`retend-web-devtools`**: Browser extension integration for inspecting the DOM renderer.
+- **`retend`**: The renderer-independent core, including reactivity, JSX, control flow, and routing.
+- **`retend-web`**: The DOM renderer for browser applications.
+- **`retend-server`**: Server-side rendering and static site generation support.
+- **`retend-start`**: CLI for scaffolding new Retend projects.
+- **`retend-utils`**: Utility functions, hooks, and reusable components.
+- **`retend-web-devtools`**: Development tools for inspecting Retend web applications.
 
 ## Links
 
