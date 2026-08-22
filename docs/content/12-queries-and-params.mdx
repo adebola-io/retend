@@ -1,19 +1,19 @@
 ---
 title: 'Queries and Params'
-description: 'Store state in the URL for shareable links.'
+description: 'Read and update URL parameters and query parameters.'
 ---
 
 # Queries and Params
 
-If you want users to be able to share links or bookmark specific pages (like looking at a specific product, or saving their search results), you need to store that information right in the URL.
+Store state in the URL when links should preserve a page, product, or search result.
 
-Retend gives you two ways to read data from the URL: **URL Parameters** (for required variables like an ID) and **Query Parameters** (for optional things like search filters).
+Retend provides two URL data sources: **URL Parameters** for route variables such as IDs, and **Query Parameters** for optional values such as search filters.
 
 ## URL Parameters
 
-In the previous section, we showed how to define dynamic routes like `/users/:userId`. When a user visits `/users/123`, the `:userId` part of the URL is called a **URL Parameter**.
+In a dynamic route such as `/users/:userId`, the `:userId` segment is a **URL Parameter**. For `/users/123`, its value is `123`.
 
-To read this parameter inside your component, use the `useCurrentRoute()` hook. It returns a reactive Cell containing the current route's information.
+Use the `useCurrentRoute()` hook to read the parameter in a component. The hook returns a reactive Cell containing the current route.
 
 ```tsx
 import { useCurrentRoute } from 'retend/router';
@@ -34,7 +34,7 @@ export function UserProfile() {
 }
 ```
 
-Because `currentRoute` is a Cell, if a user navigates from `/users/123` to `/users/456`, your component doesn't need to rebuild itself. The `userId` Cell simply updates, and the text on the screen changes instantly.
+Because `currentRoute` is a Cell, navigating from `/users/123` to `/users/456` updates the `userId` Cell without rebuilding the component.
 
 The route object contains:
 
@@ -42,17 +42,17 @@ The route object contains:
 - **`path`**: The matched path pattern (e.g., `/users/:userId`).
 - **`fullPath`**: The full URL path including query string and hash.
 
-_(Note: Data from the URL is always a string. If you need it to be a number, you must convert it yourself using `parseInt` or `Number`)._
+_URL data is always returned as a string. Convert it explicitly with `parseInt` or `Number` when a number is required._
 
 ## Query Parameters
 
-Query parameters are the key-value pairs at the end of a URL, like `?search=shoes&sort=price`. They are perfect for optional data like search terms, active filters, or pagination.
+Query parameters are key-value pairs at the end of a URL, such as `?search=shoes&sort=price`. They can represent optional values such as search terms, filters, or pagination.
 
-Unlike URL parameters, you don't need to define query parameters in your routes. Any URL can have them.
+Unlike URL parameters, query parameters do not need to be declared in routes. Any URL can contain them.
 
 ### Reading Query Values
 
-To read query parameters, use the `useRouteQuery()` hook.
+Use the `useRouteQuery()` hook to read query parameters.
 
 ```tsx
 import { useRouteQuery } from 'retend/router';
@@ -83,9 +83,9 @@ If a URL has multiple values for the same key (like `?tags=red&tags=blue`), you 
 
 ### Updating Query Parameters
 
-You can also use the `query` object to change the URL. You don't need to build the URL string yourself; Retend handles it for you.
+The `query` object also provides methods for updating the URL, without manually constructing a URL string.
 
-Because updating the URL is technically navigating to a new page, these methods are asynchronous:
+These methods are asynchronous because updating the URL performs navigation:
 
 ```tsx
 import { useRouteQuery } from 'retend/router';
@@ -120,4 +120,4 @@ export function Filters() {
 }
 ```
 
-Since query parameters are completely reactive, calling `query.set()` updates the URL, which automatically updates any component on the page that is reading those values using `query.get()`. Your screen stays perfectly in sync with the URL.
+Query parameters are reactive. Calling `query.set()` updates the URL and the components that read the value with `query.get()`.

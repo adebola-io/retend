@@ -1,15 +1,15 @@
 ---
 title: 'Control Flow'
-description: 'Handle conditionals and lists with If, For, and Switch.'
+description: 'Render conditionals and lists with If, For, and Switch.'
 ---
 
 # Control Flow
 
-In Retend, you use special functions—`If`, `For`, and `Switch`—to handle conditionals and lists in your user interface. These functions connect directly to your Cells, so when your data changes, your layout updates automatically.
+Use the `If`, `For`, and `Switch` functions to render conditionals and lists. They can read Cells and update the rendered output when their values change.
 
 ## Conditional Rendering with `If`
 
-When you want to show or hide parts of your interface based on a condition, use the `If` function.
+Use `If` to show or hide interface content based on a condition.
 
 It takes a Cell (or any regular value) and branches based on whether the value is true or false.
 
@@ -35,7 +35,7 @@ function ToggleMessage() {
 }
 ```
 
-If you only care about the `true` case, you can just provide that branch:
+To provide only the `true` branch:
 
 ```tsx
 {
@@ -45,11 +45,11 @@ If you only care about the `true` case, you can just provide that branch:
 }
 ```
 
-_(Note: Standard JavaScript `if` statements or `&&` operators don't connect to Retend's reactivity system if the data changes later. Always use the `If` function for parts of your UI that can change)._
+_Standard JavaScript `if` statements and `&&` operators do not connect to Retend's reactivity system when the data changes. Use `If` for conditional interface content that can change._
 
 ### Shorthand Syntax
 
-If you only need to render something when the value is truthy, you can pass a function instead of an object:
+For a truthy branch without a false branch, pass a function instead of an object:
 
 ```tsx
 {
@@ -57,7 +57,7 @@ If you only need to render something when the value is truthy, you can pass a fu
 }
 ```
 
-You can also provide a third argument for the falsy case:
+Pass a third argument to define the falsy branch:
 
 ```tsx
 {
@@ -71,9 +71,9 @@ You can also provide a third argument for the falsy case:
 
 ## Rendering Lists with `For`
 
-When you have an array of data, use the `For` function to display a list of elements.
+Use `For` to render an array as a list of elements.
 
-You provide the array, and a callback function that returns the JSX you want to render for each item.
+Pass the array and a callback that returns the JSX for each item.
 
 ```tsx
 import { For, Cell } from 'retend';
@@ -100,17 +100,17 @@ function ItemList() {
 }
 ```
 
-_(Note: The `index` parameter is a reactive `Cell<number>`, not a plain number. You can pass it directly into JSX and it will update automatically, but if you need to use it in a calculation, call `index.get()` first.)_
+_The `index` parameter is a reactive `Cell<number>`, not a plain number. You can pass it directly into JSX. Call `index.get()` before using it in a calculation._
 
-### Using Keys for Efficiency
+### Keys in Lists
 
-When rendering a list of objects that might change (like adding or removing items), it's highly recommended to provide a `key` in the options object at the end.
+When rendering a list of objects that can change, provide a `key` in the final options object.
 
-The `key` tells Retend how to uniquely identify each item, which makes updating the list much faster. You can provide the name of the unique ID property as a string, like `key: 'id'`.
+The `key` identifies each item so Retend can update the list. Set it to the name of a unique ID property, such as `key: 'id'`.
 
 ## Multi-State Rendering with `Switch`
 
-When you have more than two possible states—like checking whether data is "loading", "success", or "error"—nested `If` functions can get messy. The `Switch` function handles this cleanly.
+Use `Switch` when a value can have more than two states, such as `loading`, `success`, and `error`.
 
 ```tsx
 import { Switch, Cell } from 'retend';
@@ -134,7 +134,7 @@ function DataFetcher() {
 
 ### Default Case
 
-If the value might not match any of the defined branches, you can pass a third argument as a fallback:
+Pass a third argument as a fallback when the value does not match a defined branch:
 
 ```tsx
 {
@@ -149,4 +149,4 @@ If the value might not match any of the defined branches, you can pass a third a
 }
 ```
 
-By using `If`, `For`, and `Switch`, you ensure your layouts stay in sync with your data automatically.
+`If`, `For`, and `Switch` keep the rendered output synchronized with their input values.

@@ -9,7 +9,7 @@ All hooks listed on this page are imported from `retend-utils/hooks`.
 
 ## useElementBounding
 
-Tracks the bounding rectangle of an HTML element reactively. The returned object contains a reactive `Cell` for each dimension, and updates automatically when the element's size or position changes.
+Tracks an HTML element's bounding rectangle. The returned object contains a reactive `Cell` for each dimension and updates when the element's size or position changes.
 
 **Parameters:**
 
@@ -48,7 +48,7 @@ function PositionTracker() {
 
 ## useLiveDate
 
-Provides a reactive `Cell` containing the current date and time, updated at a configurable interval.
+Returns a reactive `Cell` containing the current date and time. The cell updates at the specified interval.
 
 **Parameters:**
 
@@ -70,7 +70,7 @@ function Clock() {
 
 ## useWindowSize
 
-Returns reactive cells that track the current window dimensions.
+Returns reactive cells for the current window dimensions.
 
 **Parameters:** None.
 
@@ -94,7 +94,7 @@ function AdaptiveLayout() {
 
 ## useOnlineStatus
 
-Tracks the network connection status reactively.
+Tracks the browser's network connection status.
 
 **Parameters:** None.
 
@@ -120,7 +120,7 @@ function NetworkBanner() {
 
 ## useLocalStorage
 
-Creates a reactive `Cell` that is automatically synchronized with `localStorage`. Changes to the cell are persisted, and the stored value is restored on initialization.
+Creates a reactive `Cell` synchronized with `localStorage`. Changes to the cell are persisted, and the stored value is restored during initialization.
 
 **Parameters:**
 
@@ -150,7 +150,7 @@ function ThemeSwitcher() {
 
 ## useSessionStorage
 
-Creates a reactive `Cell` synchronized with `sessionStorage`. Behaves identically to `useLocalStorage`, but the data is scoped to the browser session.
+Creates a reactive `Cell` synchronized with `sessionStorage`. It has the same behavior as `useLocalStorage`, but the data is scoped to the browser session.
 
 **Parameters:**
 
@@ -180,9 +180,9 @@ function SessionCounter() {
 
 ## useDerivedValue
 
-Normalizes a value that may be either a static value or a `Cell` into a consistent `Cell`. If the input is already a `Cell`, the returned cell tracks it. If the input is a plain value, the returned cell holds it as a constant.
+Normalizes a static value or `Cell` to a `Cell`. If the input is a `Cell`, the returned cell tracks it. If the input is a plain value, the returned cell holds it as a constant.
 
-This is useful inside components that accept props which may or may not be reactive.
+Use this in components that accept either reactive or non-reactive props.
 
 **Parameters:**
 
@@ -203,9 +203,9 @@ function Label(props: { text: Cell<string> | string }) {
 
 ## useDerivedAsyncValue
 
-Normalizes a value that may be a static value, a `Cell`, or an `AsyncCell` into an `AsyncDerivedCell`. If the input is asynchronous, the returned cell resolves it through Retend's async derivation flow. If the input is synchronous, it tracks the cell or holds the static value as a constant.
+Normalizes a static value, `Cell`, or `AsyncCell` to an `AsyncDerivedCell`. For asynchronous input, the returned cell resolves it through Retend's async derivation flow. For synchronous input, it tracks the cell or holds the static value as a constant.
 
-This is useful inside async-aware components that accept props which may or may not already be reactive.
+Use this in components that accept synchronous or asynchronous reactive props.
 
 **Parameters:**
 
@@ -228,7 +228,7 @@ function AsyncLabel(props: {
 
 ## useMatchMedia
 
-Creates a reactive `Cell` that tracks whether a CSS media query currently matches.
+Creates a reactive `Cell` that tracks whether a CSS media query matches.
 
 **Parameters:**
 
@@ -252,7 +252,7 @@ function ThemeIndicator() {
 
 ## useCursorPosition
 
-Tracks the cursor position within the window reactively.
+Tracks the cursor position within the window.
 
 **Parameters:** None.
 

@@ -1,11 +1,11 @@
 ---
 title: 'Special Attributes'
-description: 'Special behavior for class, style, and ref attributes.'
+description: 'Use the class, style, and ref attributes for element configuration and references.'
 ---
 
 # Special Attributes
 
-In Retend, certain attributes have unique behaviors when applied to underlying UI elements. These are designed to provide a smooth developer experience while maintaining high performance. The most common special attributes are `class`, `style`, and `ref`.
+Some attributes have behavior specific to Retend elements. The most common are `class`, `style`, and `ref`.
 
 ## The `class` Attribute
 
@@ -17,9 +17,9 @@ To specify CSS classes on an element, use the `class` attribute (unlike React, w
 
 ### Dynamic Classes
 
-Because Retend relies on Cells for reactivity, you can easily apply classes conditionally. Instead of messy string concatenations, Retend provides a powerful array and object syntax for dynamic classes built right in!
+Use arrays and objects to define classes conditionally. This avoids constructing class strings manually.
 
-You can pass an array of strings, or objects where the key is the class name and the value is a boolean or a Cell. If the value is a Cell, Retend automatically sets up bindings to toggle the class efficiently without re-rendering the component.
+You can pass an array of strings, or objects where the key is the class name and the value is a boolean or a Cell. When a value is a Cell, Retend binds the class to that Cell and updates the class without rerendering the component.
 
 ```tsx
 import { Cell } from 'retend';
@@ -57,13 +57,13 @@ When using an object, CSS property names should typically be written in camelCas
 </div>
 ```
 
-Just like `class`, if your styles depend on reactive state, the property values within the style object can be Cells directly. Using Cells in the style object provides optimized updates without re-rendering the element.
+As with `class`, style object values can be Cells. Retend updates the affected style when the Cell changes without rerendering the element.
 
 ## The `ref` Attribute
 
-The `ref` attribute provides a way to get a direct reference to the underlying UI element after it has been created. This is essential when you need to perform imperative actions, manage focus, or integrate with non-reactive third-party libraries.
+The `ref` attribute provides a reference to the underlying UI element after it is created. Use it for imperative actions, focus management, or integration with non-reactive third-party libraries.
 
-In Retend, you create a ref by using `Cell.source(null)`. You then pass this cell directly to the `ref` attribute. Once the element is created, Retend automatically updates the cell with the reference to the UI element.
+Create a ref with `Cell.source(null)` and pass the cell to the `ref` attribute. Retend sets the cell to the element after it is created.
 
 ```tsx
 import { Cell } from 'retend';
@@ -92,7 +92,7 @@ export function AutoFocusInput() {
 
 #### Example: Media Control
 
-Refs are particularly useful for interacting with browser APIs that Retend doesn't wrap reactively, like controlling a `<video>` or `<audio>` element.
+Use refs to interact with browser APIs that Retend does not wrap reactively, such as APIs for controlling `<video>` or `<audio>` elements.
 
 ```tsx
 import { Cell } from 'retend';
@@ -119,7 +119,7 @@ export function VideoPlayer() {
 
 #### Ref Forwarding
 
-Since `ref={cell}` is just a prop, you can pass it down to child components manually and attach it to any element you choose.
+`ref={cell}` is a prop. Pass it to a child component and attach it to an element in that component.
 
 ```tsx
 import { Cell, onSetup } from 'retend';

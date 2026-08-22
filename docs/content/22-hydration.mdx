@@ -1,11 +1,11 @@
 ---
 title: 'Hydration'
-description: 'Make static HTML interactive by reconnecting listeners and Cells.'
+description: 'Attach client behavior to server-rendered HTML.'
 ---
 
 # Hydration
 
-After the server generates static HTML, the browser needs to "wake it up" — reconnecting event listeners, reactive Cells, and making the page interactive. This process is called **hydration**.
+After the server generates static HTML, the browser attaches event listeners and reactive Cells to make the page interactive. This process is called **hydration**.
 
 ## Basic Setup
 
@@ -19,7 +19,7 @@ import { createRouter } from './router';
 hydrate(createRouter);
 ```
 
-The `hydrate` function:
+The `hydrate` function performs the following steps:
 
 1. Finds the existing server-rendered HTML.
 2. Re-creates the router and matches the current URL.
@@ -45,10 +45,10 @@ hydrate(createRouter, {
 });
 ```
 
-| Option   | Default | Description                                                                              |
-| -------- | ------- | ---------------------------------------------------------------------------------------- |
-| `rootId` | `"app"` | The `id` of the root element that holds the server-rendered HTML.                        |
-| `wrap`   | —       | A function that wraps the app root before rendering. Useful for adding global providers. |
+| Option   | Default | Description                                                                        |
+| -------- | ------- | ---------------------------------------------------------------------------------- |
+| `rootId` | `"app"` | The `id` of the root element that holds the server-rendered HTML.                  |
+| `wrap`   | —       | A function that wraps the app root before rendering. Used to add global providers. |
 
 ### Wrapping the App
 

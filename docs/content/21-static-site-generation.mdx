@@ -1,17 +1,17 @@
 ---
 title: 'Static Site Generation'
-description: 'Pre-render pages to HTML at build time.'
+description: 'Generate page HTML at build time.'
 ---
 
 # Static Site Generation
 
-Static Site Generation (SSG) lets you pre-render your application's pages into static HTML files at build time. This means users see content instantly when they load the page, and search engines can crawl your site without running JavaScript.
+Static Site Generation (SSG) renders application pages as static HTML files during the build. The files can be served without running JavaScript for the initial response.
 
-Retend provides a Vite plugin, `retendSSG`, that handles this process automatically.
+Retend provides the `retendSSG` Vite plugin for this process.
 
 ## Setup
 
-First, import the plugin and add it to your Vite configuration:
+Import the plugin and add it to the Vite configuration:
 
 ```ts
 // vite.config.ts
@@ -96,7 +96,7 @@ When you run `vite build`, the plugin:
 5. Serializes the rendered output into a static HTML file.
 6. Handles any redirects defined in your routes automatically.
 
-The resulting HTML files are fully self-contained and can be served by any static file host.
+The generated HTML files can be served by a static file host.
 
 ## Redirects
 

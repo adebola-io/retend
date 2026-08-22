@@ -18,21 +18,21 @@ export function Home() {
 
 Home.metadata = () => {
   return {
-    title: 'Retend - A simpler way to build user interfaces',
+    title: 'Retend - Reactive user interfaces with JSX',
     description:
-      'Retend is a modern, lightweight runtime to build incredibly fast, reactive web applications. Get started with the simpler UI framework.',
-    ogTitle: 'Retend - A simpler way to build user interfaces',
+      'Retend is a renderer-independent reactive framework for building web applications with JSX.',
+    ogTitle: 'Retend - Reactive user interfaces with JSX',
     ogDescription:
-      'Retend is a modern, lightweight runtime to build incredibly fast, reactive web applications. Get started with the simpler UI framework.',
+      'Retend is a renderer-independent reactive framework for building web applications with JSX.',
     ogImage: 'https://retend.dev/og/overview.png',
     ogUrl: 'https://retend.dev/',
     ogType: 'website',
     ogLocale: 'en_US',
     ogLogo: 'https://retend.dev/og/overview.png',
     twitterCard: 'summary_large_image',
-    twitterTitle: 'Retend - A simpler way to build user interfaces',
+    twitterTitle: 'Retend - Reactive user interfaces with JSX',
     twitterDescription:
-      'Retend is a modern, lightweight runtime to build incredibly fast, reactive web applications. Get started with the simpler UI framework.',
+      'Retend is a renderer-independent reactive framework for building web applications with JSX.',
     twitterImage: 'https://retend.dev/og/overview.png',
   };
 };

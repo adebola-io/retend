@@ -1,15 +1,15 @@
 ---
 title: 'Page Metadata'
-description: 'Define page titles and meta tags per route.'
+description: 'Define titles and meta tags for routes.'
 ---
 
 # Page Metadata
 
-Retend's router has built-in support for managing page metadata — titles, descriptions, Open Graph tags, Twitter cards, and more. Metadata is defined per-route and updates automatically when the user navigates. With SSR or SSG, those tags are also written into the initial HTML head.
+Retend's router supports page metadata such as titles, descriptions, Open Graph tags, and Twitter Cards. Metadata is defined per route and updates when navigation occurs. With SSR or SSG, the metadata is included in the initial HTML head.
 
 ## Setting a Page Title
 
-The simplest form of metadata is the `title` property on a route definition:
+Set the page title with the `title` property on a route definition:
 
 ```tsx
 const routes = defineRoutes([
@@ -26,11 +26,11 @@ const routes = defineRoutes([
 ]);
 ```
 
-When a user navigates to `/about`, the browser tab title updates to "About Us | My App" automatically.
+When navigation reaches `/about`, the browser tab title becomes "About Us | My App".
 
 ## Route Metadata
 
-For richer metadata (descriptions, social sharing tags, etc.), use the `metadata` property:
+For descriptions and social sharing tags, use the `metadata` property:
 
 ```tsx
 const routes = defineRoutes([
@@ -85,7 +85,7 @@ Retend recognizes these metadata keys and maps them to the appropriate HTML tags
 
 ## Dynamic Metadata
 
-Sometimes metadata depends on the current URL. For example, a user profile page needs to show the user's name in the title. Pass a function instead of an object:
+To derive metadata from the current URL, pass a function instead of an object. For example, a user profile page can use the user's name in its title:
 
 ```tsx
 const routes = defineRoutes([
@@ -113,7 +113,7 @@ The function receives an object with:
 
 ## Component-Level Metadata
 
-You can also attach metadata directly to a component function:
+Metadata can also be attached directly to a component function:
 
 ```tsx
 function BlogPost(props) {
@@ -129,7 +129,7 @@ BlogPost.metadata = async ({ params }) => {
 };
 ```
 
-This is useful when the component itself is the best place to define what metadata it needs. If both the route and the component define metadata, they are merged — component metadata takes precedence.
+This places metadata with the component that uses it. If both the route and component define metadata, the values are merged and component metadata takes precedence.
 
 ## Metadata Cascading
 

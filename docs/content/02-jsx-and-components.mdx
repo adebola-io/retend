@@ -1,21 +1,21 @@
 ---
 title: 'JSX and Components'
-description: 'JSX describes your UI, components organize it.'
+description: 'Use JSX to describe interfaces and components to organize them.'
 ---
 
 # JSX and Components
 
-Retend uses **JSX** to describe your user interface and **Components** to organize those descriptions into reusable pieces.
+Retend uses **JSX** to describe user interfaces and components to organize JSX into reusable pieces.
 
 ## What is JSX?
 
-JSX looks exactly like HTML, but it lives inside your JavaScript files. It lets you keep your layout and your logic in the same place.
+JSX uses HTML-like syntax in JavaScript or TypeScript files. It allows markup and related logic to be defined together.
 
 ```tsx
 const heading = <h1>Hello, Retend!</h1>;
 ```
 
-Because JSX is basically just HTML under the hood, you can use regular HTML attributes.
+JSX supports standard HTML attributes.
 
 For CSS classes, use `class`:
 
@@ -34,7 +34,7 @@ For form labels, use `for`:
 
 ### Adding JavaScript to JSX
 
-The real power of JSX is being able to insert JavaScript variables directly into your markup using curly braces `{}`.
+Use curly braces `{}` to insert JavaScript expressions into JSX.
 
 ```tsx
 const userName = 'Alice';
@@ -48,7 +48,7 @@ const profile = (
 );
 ```
 
-You can use curly braces for attributes, too. For inline styles, simply pass a JavaScript object:
+Curly braces also work for attributes. For inline styles, pass a JavaScript object:
 
 ```tsx
 const alertBox = (
@@ -60,9 +60,9 @@ const alertBox = (
 
 ## What are Components?
 
-As your application grows, writing all your JSX in one place becomes messy. Components let you break your UI down into smaller, independent building blocks.
+Components separate an interface into smaller units. This helps organize JSX as an application grows.
 
-In Retend, a component is just a standard JavaScript function that returns JSX. Component names must start with a **capital letter** so Retend can tell them apart from regular HTML tags.
+A Retend component is a JavaScript function that returns JSX. Component names must start with a **capital letter** so Retend can tell them apart from regular HTML tags.
 
 ```tsx
 function Greeting() {
@@ -70,7 +70,7 @@ function Greeting() {
 }
 ```
 
-Once defined, you can use your component just like an HTML element:
+Use the component as a JSX element:
 
 ```tsx
 function App() {
@@ -85,7 +85,7 @@ function App() {
 
 ### Passing Data with Props
 
-Hardcoded components aren't very useful. You usually want to pass custom data into them. You can do this using **props** (short for properties). Props look exactly like HTML attributes:
+Pass data to a component with **props** (short for properties). Props use JSX attribute syntax:
 
 ```tsx
 <UserCard name="Alice" age={30} />
@@ -108,7 +108,7 @@ function UserCard(props) {
 
 ### Wrapping Content with Children
 
-Sometimes you want a component to act like a container, such as a custom card or an alert box. If you place content between the opening and closing tags, it will be available inside your component as the `children` prop:
+A component can receive nested content through the `children` prop. Content between its opening and closing tags is passed as `children`:
 
 ```tsx
 function AlertBox(props) {

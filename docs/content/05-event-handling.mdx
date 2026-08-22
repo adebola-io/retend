@@ -1,15 +1,15 @@
 ---
 title: 'Event Handling'
-description: 'Respond to user interactions like clicks, typing, and hovers.'
+description: 'Respond to clicks, input, hover, and other events.'
 ---
 
 # Event Handling
 
-When users click buttons, type in inputs, or hover over elements, you want your application to respond. In Retend, you do this using event props.
+Retend handles user interactions through event props.
 
 ## Listening to Events
 
-Adding event listeners is simple: pass a function to an event prop. Use **camelCase** event names (like `onClick`, `onInput`, `onSubmit`) rather than the lowercase HTML style.
+Pass a function to an event prop to register a listener. Use **camelCase** event names such as `onClick`, `onInput`, and `onSubmit`.
 
 ```tsx
 function LoggingButton() {
@@ -27,7 +27,7 @@ function LoggingButton() {
 
 ## Working with the Event Object
 
-Your event handler function automatically receives the standard `Event` object. This object holds all the details about what just happened—like which key was pressed, where the mouse clicked, or what text the user typed.
+The event handler receives the standard `Event` object, which contains information about the event, including its target and input details.
 
 ```tsx
 function SearchInput() {
@@ -49,7 +49,7 @@ function SearchInput() {
 
 ## Updating State from Events
 
-Most of the time, an event should change something on the screen. To do this, simply update your Cells by calling `.set()`. Because Retend is reactive, updating the Cell automatically updates the user interface.
+To update the interface in response to an event, call `.set()` on the relevant Cell. Retend then updates the bound interface.
 
 ```tsx
 import { Cell } from 'retend';
@@ -74,9 +74,9 @@ function ToggleSwitch() {
 
 ## Event Modifiers
 
-Sometimes dealing with events requires writing the same extra code over and over again. For example, you almost always need to call `event.preventDefault()` when a user submits a form, otherwise the browser will try to navigate to a new page.
+Some event handlers need standard operations such as `event.preventDefault()`. For example, preventing the default action is commonly required when handling form submission.
 
-Retend provides **modifiers** that handle these common tasks for you automatically. You attach them directly to your event names using double hyphens (`--`):
+Retend provides **modifiers** for these operations. Append modifiers to event names with double hyphens (`--`):
 
 ```tsx
 function Form() {
@@ -100,7 +100,7 @@ function Form() {
 - **`--once`**: Ensures the event handler only runs a single time, then automatically removes it.
 - **`--passive`**: Improves performance for scrolling events (like `onScroll` or `onTouchMove`). Cannot be used with `--prevent`.
 
-You can even combine modifiers if you need to:
+Modifiers can be combined:
 
 ```tsx
 function EventShowcase() {

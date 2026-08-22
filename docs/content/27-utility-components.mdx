@@ -1,6 +1,6 @@
 ---
 title: 'Utility Components'
-description: 'Components and factory functions from retend-utils.'
+description: 'Components and factory functions exported by retend-utils.'
 ---
 
 # Utility Components
@@ -9,7 +9,7 @@ All components and factory functions listed on this page are imported from `rete
 
 ## Input
 
-A reactive input component with two-way data binding. The `model` prop accepts a `Cell` whose value stays synchronized with the input element. The cell type should correspond to the input type.
+An input component with two-way data binding. The `model` prop accepts a `Cell` whose value is synchronized with the input element. The cell type should correspond to the input type.
 
 **Props:**
 
@@ -38,7 +38,7 @@ function LoginForm() {
 
 ## FluidList
 
-Renders a list with dynamic sizing, staggered animations, and flexible layouts. Transitions between list states are handled automatically using FLIP-based animation.
+Renders a list with dynamic sizing, staggered animations, and configurable layouts. It uses FLIP-based animation for transitions between list states.
 
 **Props:**
 
@@ -101,9 +101,9 @@ function TaskBoard() {
 
 ## UniqueTransition
 
-A component that animates the children of a `createUnique()` component with smooth FLIP animations. When the unique instance moves between positions in the tree, `UniqueTransition` animates its children from their previous position and size to their new one using CSS transforms.
+Animates the children of a `createUnique()` component with FLIP animation. When the unique instance moves in the tree, `UniqueTransition` animates its children from their previous position and size to their new position and size using CSS transforms.
 
-This component must be used within a `createUnique` component. See the [Unique Instances](/docs/unique) page for more details.
+Use this component within a `createUnique` component. See [Unique Instances](/docs/unique) for details.
 
 **Props:**
 
@@ -195,7 +195,7 @@ function App() {
 
 ### Preserving State During Transitions
 
-Use the `onMove` hook from `retend` to capture and restore element state (such as scroll position) across transitions.
+Use the `onMove` hook from `retend` to capture and restore element state, such as scroll position, across transitions.
 
 ```tsx
 import { Cell, createUnique, onMove } from 'retend';

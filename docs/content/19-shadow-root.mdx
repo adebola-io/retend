@@ -1,17 +1,17 @@
 ---
 title: 'Shadow Root'
-description: 'Isolate widget styles with a shadow root.'
+description: 'Isolate component styles and markup with a shadow root.'
 ---
 
 # Shadow Root
 
-When you are building a reusable widget (like a complex calendar or a video player), you often worry about CSS leaking. You don't want your widget's styles to accidentally ruin the design of the rest of the website, and you don't want the website's global CSS to bleed in and break your widget.
+A reusable widget can require style isolation so its styles do not affect the surrounding document and document styles do not affect the widget.
 
-The browser's native **Shadow DOM** solves this by letting you create a hidden, isolated HTML tree. Retend makes it incredibly easy to use with the `<ShadowRoot>` component.
+The browser’s **Shadow DOM** provides this isolation with a separate DOM tree. Retend exposes it through the `<ShadowRoot>` component.
 
 ## Using ShadowRoot
 
-To isolate a part of your component, simply wrap it in `<ShadowRoot>`. Remember to import it from `retend-web`, as it is a browser-specific feature!
+Wrap the content to isolate in `<ShadowRoot>`. Import it from `retend-web`, because it is browser-specific.
 
 ```tsx
 import { ShadowRoot } from 'retend-web';
@@ -27,11 +27,11 @@ function Card() {
 }
 ```
 
-In the example above, the `<ShadowRoot>` attaches itself to its parent `<div>`. Everything inside the `<ShadowRoot>` is safely isolated.
+`<ShadowRoot>` attaches to its parent `<div>`. Content inside it is isolated from the surrounding document.
 
 ## Escaping Global Styles
 
-Because the Shadow DOM completely isolates your elements, you can safely use `<style>` tags directly inside it without worrying about them affecting anything else on the page.
+The Shadow DOM isolates the elements it contains, so a `<style>` element inside the shadow root applies within that shadow root rather than to the rest of the document.
 
 ```tsx
 import { ShadowRoot } from 'retend-web';
@@ -52,13 +52,11 @@ function StyledComponent() {
 }
 ```
 
-The global `.test` class doesn't affect the inner `div`, and the inner `<style>` doesn't turn the outer `div` red. It's perfectly safe!
+The global `.test` class does not affect the inner `div`, and the inner `<style>` does not change the outer `div`.
 
 ## Reactivity and Features
 
-Even though the HTML is isolated from the rest of the page, **your Retend code works exactly like normal**.
-
-You don't have to learn any new patterns to use a Shadow Root. Everything you already know about Retend continues to work seamlessly through the isolation barrier:
+The HTML is isolated from the rest of the page, but Retend’s component behavior remains available across the shadow boundary:
 
 - **Reactivity:** You can use Cells and control flow functions (`If`, `For`) naturally.
 - **Context and Scopes:** Context from `createScope()` flows down through the shadow boundary perfectly.
@@ -97,7 +95,7 @@ function IsolatedToggle() {
 
 ## Important Rules
 
-When working with `<ShadowRoot>`, there are a couple of rules to keep in mind:
+When using `<ShadowRoot>`, follow these rules:
 
 1. **It must be inside an HTML element:** The `<ShadowRoot>` attaches to its direct parent. That parent must be a standard HTML element (like a `<div>`, `<section>`, or `<article>`).
 2. **Only one per parent:** You should never place two `<ShadowRoot>` components directly inside the exact same parent element.

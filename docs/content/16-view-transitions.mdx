@@ -1,15 +1,15 @@
 ---
 title: 'View Transitions'
-description: 'Animate between pages with the View Transitions API.'
+description: 'Use the View Transitions API for route changes.'
 ---
 
 # View Transitions
 
-Modern browsers support the [View Transitions API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API), which lets you animate between different views of your application. Retend's router has built-in support for this feature.
+The [View Transitions API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API) animates changes between application views. Retend’s router can use this API for route changes.
 
 ## Enabling View Transitions
 
-To enable view transitions, pass `useViewTransitions: true` when creating your `Router`:
+Set `useViewTransitions: true` when creating the `Router`:
 
 ```tsx
 import { Router, defineRoutes } from 'retend';
@@ -27,17 +27,17 @@ export function createRouter() {
 }
 ```
 
-When enabled, every route change is automatically wrapped in a call to `document.startViewTransition()`. If the browser doesn't support the API, the router falls back to instant navigation.
+When enabled, the router wraps each route change in `document.startViewTransition()`. If the browser does not support the API, the router uses immediate navigation.
 
 ## Automatic Direction Types
 
-The router automatically determines the direction of each navigation and adds a type to the view transition. This lets you apply different animations for forward and backward navigation:
+The router determines the navigation direction and adds a type to the view transition. Use these types to define different animations for forward and backward navigation:
 
 - **`forwards`** — Navigating to a new page.
 - **`backwards`** — Navigating back in the history stack.
 - **`neutral`** — Replacing the current page or navigating to the same path.
 
-You can target these types in your CSS:
+Target these types in CSS:
 
 ```css
 @keyframes slide-in-from-right {
@@ -69,7 +69,7 @@ You can target these types in your CSS:
 
 ## Per-Route Transition Types
 
-You can assign a custom `transitionType` to individual routes. This lets you apply specific animations to particular pages:
+Assign a custom `transitionType` to an individual route to select a transition for that route:
 
 ```tsx
 const routes = defineRoutes(() => [
@@ -87,7 +87,7 @@ const routes = defineRoutes(() => [
 ]);
 ```
 
-The per-route `transitionType` is added alongside the direction type, so both are available to your CSS at the same time:
+The per-route `transitionType` is added alongside the direction type. Both types are available to CSS:
 
 ```css
 ::view-transition-group(gallery) {
@@ -99,4 +99,4 @@ The per-route `transitionType` is added alongside the direction type, so both ar
 }
 ```
 
-This gives you fine-grained control over how each page enters and exits, while still benefiting from the automatic direction detection.
+This allows CSS to select transitions by route and navigation direction.

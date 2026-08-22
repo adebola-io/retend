@@ -1,17 +1,17 @@
 ---
 title: 'Middleware'
-description: 'Protect routes and control access to pages.'
+description: 'Inspect navigation and redirect before a route is activated.'
 ---
 
 # Middleware
 
-When building an application, you often have pages that shouldn't be accessible to everyone. For example, a user shouldn't be able to reach their dashboard if they aren't logged in.
+Some routes require checks before they can be accessed, such as verifying that a user is logged in before loading a dashboard.
 
-**Middleware** acts like a security checkpoint for your router. Every time a user tries to navigate to a new page, your middleware gets a chance to inspect the request, and can choose to approve it or redirect the user somewhere else.
+**Middleware** runs during navigation. It can inspect the destination and current route, and can redirect to another path.
 
 ## Creating Middleware
 
-You create middleware using the `defineRouterMiddleware` function. It takes a function that runs right before every navigation happens:
+Create middleware with `defineRouterMiddleware`. It accepts a function that runs before navigation:
 
 ```tsx
 import { defineRouterMiddleware } from 'retend/router';
@@ -29,9 +29,7 @@ The `details` object passed to your function contains two important properties:
 
 ## Protecting Routes (Redirects)
 
-The most common use for middleware is authentication. If a user tries to visit a protected page while logged out, you want to stop them and redirect them to the login page.
-
-To do this, simply return the `redirect()` function:
+A common use for middleware is authentication. If a user requests a protected route without an active session, return a redirect to the login page:
 
 ```tsx
 import { defineRouterMiddleware, redirect } from 'retend/router';
@@ -51,11 +49,11 @@ const authMiddleware = defineRouterMiddleware((details) => {
 });
 ```
 
-If your middleware returns `redirect()`, Retend instantly cancels the original navigation and starts navigating to the new path instead.
+When middleware returns `redirect()`, Retend cancels the original navigation and starts navigation to the redirect path.
 
 ## Asynchronous Checks
 
-Often, checking if a user is allowed to view a page requires asking your server (like verifying a session token). Your middleware can be `async` to handle this:
+When access depends on a server check, such as session-token verification, define the middleware function as `async`:
 
 ```tsx
 import { defineRouterMiddleware, redirect } from 'retend/router';
@@ -72,11 +70,11 @@ const permissionMiddleware = defineRouterMiddleware(async (details) => {
 });
 ```
 
-Retend will pause the navigation and wait for your Promise to finish before moving the user to the next page.
+Retend waits for the Promise to settle before completing the navigation.
 
 ## Using Multiple Middlewares
 
-You can plug multiple middlewares into your Router. They run in the exact order you list them. If any one of them returns a redirect, the chain stops immediately.
+A `Router` can use multiple middleware functions. They run in the order listed. If one returns a redirect, subsequent middleware is not run for that navigation.
 
 ```tsx
 import { Router } from 'retend/router';
@@ -91,4 +89,4 @@ const router = new Router({
 });
 ```
 
-This lets you keep your logic clean and separated. Your logging middleware doesn't need to know anything about authentication—it just does its one job and passes the baton.
+Separate concerns by assigning each check to its own middleware function. For example, logging middleware can run independently of authentication middleware.

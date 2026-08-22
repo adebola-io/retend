@@ -1,19 +1,19 @@
 ---
 title: 'Context and Scopes'
-description: 'Share data across deeply nested components.'
+description: 'Share data with nested components through scopes.'
 ---
 
 # Context and Scopes
 
-As your application grows, you will often find that a component deep inside your layout needs access to data that lives at the very top.
+A deeply nested component may need data owned by a higher-level component.
 
-Normally, you would have to pass this data down as props through every single component in between, even if those middle components don't care about the data. In Retend, we solve this using **Scopes**.
+Passing that data through every intermediate component adds props that those components do not use. Retend provides **Scopes** for sharing data with descendants.
 
-A Scope creates a broadcast channel. A parent component can put data into the Scope, and any child component—no matter how deep—can grab that data directly.
+A Scope makes a value available to descendant components. A child can read the value without receiving it through each intermediate component.
 
 ## Creating and Using Scopes
 
-First, you create a Scope using the `createScope()` function:
+Create a Scope with `createScope()`:
 
 ```tsx
 import { createScope } from 'retend';
@@ -22,7 +22,7 @@ import { createScope } from 'retend';
 export const ThemeScope = createScope('Theme');
 ```
 
-This gives you a Scope object that contains a `Provider` component. You wrap your layout inside this `Provider` to make the data available, passing the data into the `value` prop:
+The returned Scope object contains a `Provider` component. Wrap the relevant layout in the Provider and pass the shared data through its `value` prop:
 
 ```tsx
 import { ThemeScope } from './scopes';
@@ -38,7 +38,7 @@ function App() {
 }
 ```
 
-Now, any component inside `MainLayout` can access the theme by calling `useScopeContext()`, completely skipping all the components in between:
+A component inside `MainLayout` can read the theme with `useScopeContext()` without receiving it from intermediate components:
 
 ```tsx
 import { useScopeContext } from 'retend';
@@ -62,11 +62,11 @@ function ThemedButton() {
 }
 ```
 
-If a component tries to use a Scope but there is no `Provider` wrapping it higher up in the layout, Retend will throw an error to let you know.
+If no Provider exists above a component that reads a Scope, Retend throws an error.
 
 ## Passing Reactive Data (Cells)
 
-Usually, the data you want to share across your app can change—like whether a user is logged in, or the items in their shopping cart. You can pass a `Cell` into a Scope just like any other value:
+Shared data can be reactive, such as login state or shopping cart contents. Pass a `Cell` to a Scope like any other value:
 
 ```tsx
 import { Cell, createScope, useScopeContext } from 'retend';
@@ -86,7 +86,7 @@ function App() {
 }
 ```
 
-When child components read the Cell from the Scope, they can both look at the data using `.get()` and update it using `.set()`. Because it's a Cell, any updates will automatically reflect everywhere else in the app that uses that data.
+Child components can read the Cell from the Scope, use `.get()` to read its value, and use `.set()` to update it. Updates are reflected wherever the Cell is used.
 
 ```tsx
 function UserProfile() {
@@ -113,13 +113,13 @@ function UserProfile() {
 }
 ```
 
-## Why use Scopes over Global Variables?
+## Scopes and Global Variables
 
-You might wonder why you shouldn't just create a `Cell` in a separate file and import it wherever you need it.
+A `Cell` in a separate module can also be imported wherever it is needed.
 
-While that works well for simple apps, Scopes give you two major advantages:
+Scopes provide two additional properties:
 
-1. **Independent Instances**: You can use the same Provider multiple times on a page, and each one gets its own isolated state.
-2. **Automatic Memory Cleanup**: When the part of the screen containing the `Provider` is removed, the data inside it is automatically cleaned up. A global variable lives forever and holds onto memory until the user closes the tab.
+1. **Independent instances**: Multiple Providers can exist on the same page, and each has isolated state.
+2. **Automatic cleanup**: When the part of the component tree containing a Provider is removed, Retend cleans up the scoped data. A module-level global remains available until the page is unloaded.
 
-Scopes keep your data clean, organized, and tied strictly to the parts of your interface that actually need it.
+Scopes associate shared data with a part of the component tree.

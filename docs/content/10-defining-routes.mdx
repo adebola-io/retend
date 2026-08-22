@@ -1,19 +1,19 @@
 ---
 title: 'Defining Routes'
-description: "Map URLs to pages with Retend's router."
+description: 'Map URL paths to components with Retend’s router.'
 ---
 
 # Defining Routes
 
-In most web applications, you want to show different pages when the user visits different URLs (like `/home` or `/about`). In Retend, we do this using a **Router**.
+A **Router** maps URL paths, such as `/home` and `/about`, to the components rendered for those paths.
 
-The router keeps track of the current URL and decides which components to show on the screen. Retend includes its own router built-in, so you don't need to install any extra libraries!
+The router tracks the current URL and selects the matching components. Retend includes this router, so no additional routing library is required.
 
 ## Setting Up Routes
 
-To set up your application's routing, you define an array of **Route Records**. Each record simply connects a URL path to a component.
+Define an array of **Route Records** to configure application routing. Each record maps a URL path to a component.
 
-We use the `defineRoutes` helper function to create this array:
+Use the `defineRoutes` helper to create the array:
 
 ```tsx
 import { Router, defineRoutes, createRouterRoot } from 'retend/router';
@@ -37,13 +37,13 @@ const root = document.getElementById('app')!;
 renderToDOM(root, () => createRouterRoot(router));
 ```
 
-The `createRouterRoot` function takes your router and turns it into a component that can be rendered.
+The `createRouterRoot` function converts the router into a renderable component.
 
 ## Nested Routes and Layouts
 
-Most applications share common layout elements across different pages—like a header at the top or a navigation sidebar on the left.
+Applications often share layout elements, such as a header or navigation sidebar, across pages.
 
-Instead of copying and pasting the header into every single page component, you can use **Nested Routes**. You define a parent route that acts as the layout, and use the special `<Outlet />` component to mark where the child pages should be rendered.
+**Nested Routes** let a parent route provide the layout for its child routes. Use `<Outlet />` to mark where the child component is rendered.
 
 ```tsx
 import { defineRoutes, Outlet } from 'retend/router';
@@ -75,11 +75,11 @@ const routes = defineRoutes([
 ]);
 ```
 
-Now, when a user visits `/dashboard/overview`, the `DashboardLayout` appears on the screen, and the `Overview` component is placed right where the `<Outlet />` is. When they navigate to `/dashboard/settings`, the sidebar stays exactly where it is, and only the `<Outlet />` part changes.
+At `/dashboard/overview`, the router renders `DashboardLayout` and places `Overview` at `<Outlet />`. At `/dashboard/settings`, the layout remains rendered and the outlet content changes.
 
 ### Default Child Routes
 
-If a user visits exactly `/dashboard`, the `<Outlet />` would be empty because no child route was specified. You can create a default child route by using an empty string (`''`) as the path:
+At `/dashboard`, `<Outlet />` is empty if no child route matches. Define a default child route with an empty path (`''`):
 
 ```tsx
 const routes = defineRoutes([
@@ -96,7 +96,7 @@ const routes = defineRoutes([
 
 ## Dynamic URLs
 
-Sometimes URLs need to contain variable data, like a specific user's ID or a blog post's title. You can create a dynamic route by adding a colon (`:`) before a segment in the path:
+Use dynamic routes when a URL contains variable data, such as a user ID or post title. Prefix a path segment with a colon (`:`):
 
 ```tsx
 const routes = defineRoutes([
@@ -108,13 +108,13 @@ const routes = defineRoutes([
 ]);
 ```
 
-We will cover how to actually access those variables (like the `userId`) from inside your components in the next few sections.
+The following sections describe how to read values such as `userId` from components.
 
 ## Handling "404 Not Found"
 
-If a user visits a URL that doesn't exist in your routes, you probably want to show a custom "Not Found" page. You can use an asterisk (`*`) to create a route that matches absolutely anything.
+Define a custom "Not Found" page for URLs that do not match another route by using an asterisk (`*`) as the path.
 
-Because the router checks routes in order from top to bottom, always put your "catch-all" route at the very end:
+The router checks routes from top to bottom, so place the catch-all route last:
 
 ```tsx
 const routes = defineRoutes([
@@ -126,4 +126,4 @@ const routes = defineRoutes([
 ]);
 ```
 
-With your routes defined, your application now knows exactly what to show for any URL.
+The router can now select a component for each matching URL.

@@ -11,7 +11,7 @@ export function ValueProp() {
             <FeatureCard
               icon={<BlocksIcon />}
               title="Composable."
-              description="Retend enables you to build layouts with small, reusable components, ensuring clean and organized code."
+              description="Retend supports layouts built from small, reusable components."
             />
           </Card>
         </li>
@@ -20,7 +20,7 @@ export function ValueProp() {
             <FeatureCard
               icon={<SlidersIcon />}
               title="Reactive."
-              description="Retend links your app's state with the user's view, ensuring updates occur instantly when your data changes."
+              description="Retend connects application state to rendered output and updates dependent bindings when state changes."
             />
           </Card>
         </li>
@@ -28,8 +28,8 @@ export function ValueProp() {
           <Card class="group p-6 md:p-8">
             <FeatureCard
               icon={<LightningIcon />}
-              title="Performant."
-              description="Retend updates only the necessary parts of the interface, keeping your apps lightweight on any device."
+              title="Fine-grained updates"
+              description="Retend updates the nodes and properties affected by a state change instead of rerendering the entire component tree."
             />
           </Card>
         </li>

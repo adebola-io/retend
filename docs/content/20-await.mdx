@@ -1,21 +1,19 @@
 ---
 title: 'Await'
-description: 'Show loading UI while fetching data.'
+description: 'Show fallback UI while asynchronous data loads.'
 ---
 
 # Await
 
-When your application needs to fetch data from a server, it takes time. You usually want to show a loading spinner or some placeholder text while the user waits.
+Fetching data from a server is asynchronous, so the UI may need to display a loading state while the request is pending.
 
-Managing these loading states manually (by creating boolean `isLoading` Cells and passing them around) gets very messy very quickly.
-
-Retend solves this elegantly with the `<Await>` component. It creates an invisible boundary around parts of your app, automatically hiding those parts and showing a "fallback" UI until all the data they need has finished loading.
+`<Await>` provides a boundary for this state. It hides the boundary's content and displays its `fallback` until the asynchronous data used within the boundary has finished loading.
 
 ## Async Cells
 
-To use `<Await>`, you first need to understand **Async Cells**. A normal `Cell` holds a value instantly. An Async Cell, created using `Cell.derivedAsync()`, holds a Promise that will eventually become a value.
+`<Await>` works with **Async Cells**. A normal `Cell` holds a value. An Async Cell, created using `Cell.derivedAsync()`, holds a Promise that resolves to a value.
 
-When you use an async cell in your template, Retend automatically detects that it is waiting for data, and tells the nearest `<Await>` parent to pause rendering.
+When an async cell is used in a template, Retend detects its pending state and notifies the nearest `<Await>` ancestor.
 
 ## Basic Usage
 
@@ -61,13 +59,13 @@ export function App() {
 }
 ```
 
-When the page first loads, the `<Await>` component catches the "pending" state from `UserProfile` and displays "Loading user data...". Once the API request finishes, the `<Await>` component removes the fallback and instantly reveals the real `UserProfile` showing the user's name and email.
+While the request is pending, `<Await>` displays `Loading user data...`. After the request resolves, it removes the fallback and renders `UserProfile` with the user's name and email.
 
 ## Waiting for Multiple Things
 
-An `<Await>` boundary is smart: it waits for _every single_ async operation inside it to finish before it reveals its content.
+An `<Await>` boundary waits for all asynchronous operations inside it to finish before rendering its content.
 
-If your `DashboardContent` component fetches both the user's profile AND a list of their recent posts, the `<Await>` fallback will stay on screen until _both_ of those network requests are completely finished.
+If `DashboardContent` fetches the user's profile and a list of recent posts, the `<Await>` fallback remains visible until both requests finish.
 
 ```tsx
 import { Await, If, For, Cell } from 'retend';
@@ -103,10 +101,10 @@ export function Dashboard() {
 }
 ```
 
-If you prefer them to load independently (so the user profile appears first while the posts are still loading), you can simply wrap them in two separate `<Await>` components!
+To load them independently, wrap the two sections in separate `<Await>` components.
 
 ## Server-Side Rendering (Advanced)
 
-If you are building an app with Server-Side Rendering (SSR), `<Await>` boundaries are crucial. They allow your server to know exactly when all the data on the page has finished loading, so it can send down a perfectly complete HTML document to the user.
+For Server-Side Rendering (SSR), `<Await>` boundaries identify asynchronous work that must resolve before the server sends the HTML response.
 
-Retend provides a `waitForAsyncBoundaries()` function specifically for your server code to wait for everything to settle before sending the HTML response.
+Use `waitForAsyncBoundaries()` in server code to wait for these boundaries to settle.

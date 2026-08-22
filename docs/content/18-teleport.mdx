@@ -1,21 +1,19 @@
 ---
 title: 'Teleport'
-description: 'Render UI like modals and menus above other elements.'
+description: 'Render content at a different DOM location.'
 ---
 
 # Teleport
 
-Sometimes you need to create a UI element that sits "on top" of your entire application, like a modal popup, a dropdown menu, or a tooltip.
+Use a separate DOM location for elements such as modals, dropdowns, and tooltips when an ancestor’s `overflow` or stacking context affects their layout.
 
-If you try to render these deep inside your component tree, you often run into CSS issues. Parent components might have `overflow: hidden` which cuts off your dropdown, or complex `z-index` rules that cause your modal to appear behind other elements.
-
-To solve this, Retend provides the `<Teleport>` component. It lets you write your component exactly where it belongs logically in your code, but tells the browser to render the actual HTML elements somewhere else entirely—usually at the very end of the `<body>` tag where they can avoid all CSS layout issues.
+The `<Teleport>` component keeps the content in its original component and scope hierarchy while rendering its DOM nodes at the target location, commonly near the end of `<body>`.
 
 ## Using Teleport
 
-To use Teleport, simply wrap the content you want to move and use the `to` prop to tell it where to go.
+Wrap the content to move in `<Teleport>` and set the destination with the `to` prop.
 
-Notice that `<Teleport>` is imported from `retend-web`, not `retend`, because it is specific to the browser!
+Import `<Teleport>` from `retend-web`, because it is browser-specific.
 
 ```tsx
 import { If } from 'retend';
@@ -42,7 +40,7 @@ export function Modal(props) {
 }
 ```
 
-In your main HTML file, you just need to make sure that target element actually exists:
+Ensure that the target element exists in the main HTML file:
 
 ```html
 <body>
@@ -54,16 +52,16 @@ In your main HTML file, you just need to make sure that target element actually 
 </body>
 ```
 
-You can use either an ID selector (like `#modal-root`) or a tag name (like `body`) for the `to` prop.
+The `to` prop accepts an ID selector, such as `#modal-root`, or a tag name, such as `body`.
 
 ## Logical vs. Physical
 
-The magic of `<Teleport>` is that it only moves your elements _physically_ in the HTML.
+`<Teleport>` changes the _physical_ DOM location of its content.
 
-_Logically_, your component behaves exactly as if it was still sitting in its original spot in the code. This means:
+_Logically_, the component remains associated with its original position in the component tree:
 
-1. **Reactivity works perfectly:** Any Cells you use inside the Teleport will still update the UI instantly when they change.
-2. **Scopes still work:** If you teleport a tooltip to the `<body>`, it can still access data from a Scope Provider that wraps its original parent component!
+1. **Reactivity:** Cells inside the Teleport continue to update the rendered content.
+2. **Scopes:** Content teleported to `<body>` can access data from a Scope Provider around its original parent component.
 
 ```tsx
 import { Cell, useScopeContext } from 'retend';
@@ -83,4 +81,4 @@ function ThemedTooltip() {
 }
 ```
 
-With `<Teleport>`, you don't have to choose between clean component architecture and bulletproof CSS layouts. You get both.
+This separates the component’s logical location from the DOM location required by its layout.

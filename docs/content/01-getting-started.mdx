@@ -1,56 +1,56 @@
 ---
 title: 'Getting Started'
-description: 'Get started with your first Retend project.'
+description: 'Create and run a Retend project.'
 ---
 
 # Getting Started
 
 import { FeatureCard } from '@/components/FeatureCard';
 
-Welcome! This page will help you start your first project with Retend, a modern JavaScript framework for building user interfaces. We focus on keeping your applications fast and your code simple.
+Create a Retend project, run it locally, and build a small reactive application.
 
 > **Warning**
 > Retend is currently in early development. It is **not ready for production use**. APIs, features, and behaviors are highly unstable and subject to change without notice.
 
 ## Prerequisites
 
-Before we begin, please ensure you have the following installed:
+Install the following before creating a project:
 
 - **Node.js**: If you do not have it yet, download it from the [official Node.js website](https://nodejs.org/).
 - **npm**: It ships with Node.js. If you prefer `pnpm`, the equivalent commands work too.
 
 We also assume you are familiar with basic HTML, CSS, and JavaScript.
 
-## Why Choose Retend?
+## Retend Overview
 
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
   <FeatureCard
     title="Automatic Updates"
-    description="Wrap data in Cells. Retend updates only what changes, automatically."
+    description="Cells provide reactive values and update their bound output when changed."
   />
   <FeatureCard
     title="Simple Components"
-    description="Write UI using plain JavaScript functions. They run just once, making them easy to read and debug."
+    description="Components are JavaScript functions that return JSX and run once during setup."
   />
   <FeatureCard
     title="Server-Ready"
-    description="Render on the server or generate static pages for faster load times."
+    description="Render on the server or generate static pages."
   />
   <FeatureCard
-    title="Lightweight"
-    description="Direct browser interaction without complex abstractions keeps Retend small and fast."
+    title="Renderer-based output"
+    description="The renderer maps Retend operations to browser DOM nodes."
   />
 </div>
 
 ## Setting Up Your First Project
 
-The fastest way to start learning Retend is to scaffold a new project. Open your terminal and run:
+To create a project, run the scaffold command in a terminal:
 
 ```bash
 npx retend-start@latest my-app
 ```
 
-Then move into the project, install dependencies, and start the dev server:
+Change to the project directory, install its dependencies, and start the development server:
 
 ```bash
 cd my-app
@@ -61,18 +61,18 @@ npm run dev
 By default, the scaffold creates:
 
 - [TypeScript](https://www.typescriptlang.org/)
-- [Vite](https://vitejs.dev/) for an exceptionally fast development experience
+- [Vite](https://vitejs.dev/) for development and builds
 - Built-in routing for multi-page applications
 - CSS modules for styling
 - Client-side rendering
 
-If you want Tailwind CSS, add `--tailwind`. If you want static site generation, add `--ssg`.
+Add `--tailwind` to include Tailwind CSS. Add `--ssg` to enable static site generation.
 
-> All new Retend projects come with DevTools pre-installed. Look for the floating "RT" button in the corner of your screen to inspect your component tree and live state.
+> New Retend projects include DevTools. The floating "RT" button opens the component tree and live state inspector.
 
 ## Writing Your First Application
 
-Let us build a simple toggle switch application. This will show you how Retend handles reactive data.
+The following toggle application demonstrates reactive data in Retend.
 
 After scaffolding, open `source/App.tsx` and replace its contents with:
 
@@ -106,23 +106,14 @@ If you picked JavaScript during setup, edit `source/App.jsx` instead.
 
 1. We create an `isOn` variable using `Cell.source(false)`. This wraps our boolean `false` in a reactive container.
 2. We pass `{isOn}` directly into our user interface.
-3. Retend watches that specific `Cell`. When you click the button and `toggleSwitch` runs, Retend automatically updates just the text inside the button. The `App` function itself only runs exactly once!
+3. Retend subscribes the text binding to that `Cell`. When the button calls `toggleSwitch`, the binding updates the button text. The `App` function is not called again.
 
 ## Running Your Application
 
-If the dev server is not already running, start it with:
+If the development server is not running, start it with:
 
 ```bash
 npm run dev
 ```
 
-Open your web browser and navigate to `http://localhost:5229`. You will see your toggle switch ready to be clicked!
-
-## What to Learn Next
-
-Now that you have your first app running, you can explore more advanced topics:
-
-- **[JSX and Components](/docs/jsx-and-components)**: Build reusable pieces for your user interface.
-- **[Reactivity and Cells](/docs/reactivity-and-cells)**: Learn deeply how reactive state works.
-- **[Control Flow](/docs/control-flow)**: Handle lists and conditional logic.
-- **[DevTools](/docs/devtools)**: Learn how to use the built-in inspector.
+Open `http://localhost:5229` in a browser to view the application.

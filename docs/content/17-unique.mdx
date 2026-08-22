@@ -1,19 +1,19 @@
 ---
 title: 'Unique Instances'
-description: 'Keep components alive across navigation without recreating them.'
+description: 'Preserve component instances across navigation and moves.'
 ---
 
 # Unique Instances
 
-By default, when you navigate to a different page or hide a component using `If()`, Retend destroys those components. If those components are shown again later, brand new ones are created from scratch.
+By default, navigating to another page or hiding a component with `If()` destroys the component. Rendering it again creates a new instance.
 
-This behavior is fine for static content, but interactive elements lose their internal state when recreated. A playing video stops, a canvas drawing disappears, and form inputs reset.
+Recreation resets internal state in interactive elements. For example, a playing video stops, a canvas drawing is lost, and form inputs reset.
 
-**Unique Instances** solve this by letting you create components that survive being moved around your application.
+**Unique instances** preserve a component while it moves within the application.
 
 ## Creating Persistent Components
 
-To make a component persistent, simply wrap its function in `createUnique()`:
+Wrap a component function in `createUnique()` to preserve its instance:
 
 ```tsx
 import { createUnique } from 'retend';
@@ -27,13 +27,13 @@ export const PersistentVideo = createUnique(() => {
 });
 ```
 
-Now, if you render `<PersistentVideo />` on your Home page, and then the user navigates to the About page where `<PersistentVideo />` is also rendered, the exact same component instance is seamlessly moved to the new page. The video will keep playing without skipping a beat.
+If `<PersistentVideo />` is rendered on the Home page and then on the About page, Retend moves the same component instance to the new location. The video retains its playback state.
 
 ## Multiple Independent Instances
 
-By default, every time you use a unique component, it shares the exact same underlying instance. If you render `<PersistentVideo />` in two different places at the same time, the component will move to whichever one was rendered last.
+By default, uses of a unique component share one underlying instance. If `<PersistentVideo />` is rendered in two places at the same time, the instance moves to the last rendered location.
 
-If you want multiple, independent unique instances that can coexist on the screen at the same time, just give each one a unique `id` prop:
+To create independent instances that can coexist, give each use a unique `id` prop:
 
 ```tsx
 // Two separate video players, each with their own state
@@ -41,11 +41,11 @@ If you want multiple, independent unique instances that can coexist on the scree
 <PersistentVideo id="camera-2" />
 ```
 
-Now `camera-1` and `camera-2` are completely independent persistent instances.
+`camera-1` and `camera-2` are independent persistent instances.
 
 ## Passing Props
 
-If your unique component needs to accept props, those props will be provided to your function as a single reactive `Cell`. This allows your persistent component to instantly react when it is moved to a new location with different props.
+Props for a unique component are provided to its function as one reactive `Cell`. The component can react when it moves to a location with different props.
 
 ```tsx
 import { createUnique, Cell } from 'retend';
@@ -73,9 +73,9 @@ const UniquePanel = createUnique((props) => {
 
 ## Saving and Restoring Scroll Position
 
-While `createUnique` preserves the component instance, some DOM state like scroll position is reset when the component moves between locations.
+`createUnique` preserves the component instance, but some DOM state, such as scroll position, resets when the component moves between locations.
 
-You can use the `onMove` hook to explicitly save and restore state during moves:
+Use the `onMove` hook to save and restore that state:
 
 ```tsx
 import { createUnique, onMove, Cell } from 'retend';
@@ -100,6 +100,6 @@ const ScrollableArea = createUnique(() => {
 });
 ```
 
-The `onMove` hook runs before the unique component moves. Return a function from it to run after the move completes.
+The `onMove` hook runs before the unique component moves. Return a function from the hook to run after the move completes.
 
-Unique instances are a powerful tool whenever you need components that maintain their internal state across navigation.
+Use unique instances when a component must retain internal state across navigation.

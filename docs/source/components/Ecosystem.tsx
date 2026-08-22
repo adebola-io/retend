@@ -39,24 +39,24 @@ export function Ecosystem() {
       <div>
         <SectionHeader
           label="Ecosystem"
-          title="Everything you need."
-          description="Retend ships with a full suite of tools so you can focus on your product, not your dependency list."
+          title="Included packages and features"
+          description="The project includes routing, server rendering, asynchronous boundaries, development tooling, scoped context, and custom renderer support."
         />
       </div>
 
       <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 md:gap-8">
         <li>
           <EcosystemCard
-            title="Built-in Router"
-            description="First-class routing with lazy loading, middleware, route locking, and reactive query params. No external dependencies required."
+            title="Router"
+            description="Routing includes lazy loading, middleware, route locking, and reactive query parameters."
             illustration={RouterIllustration}
           />
         </li>
 
         <li>
           <EcosystemCard
-            title="Server Rendering"
-            description="SSR and static site generation out of the box. The same components render on the server and hydrate seamlessly on the client."
+            title="Server rendering"
+            description="The server package supports server-side rendering, static site generation, and client hydration."
             illustration={SsrIllustration}
           />
         </li>
@@ -77,12 +77,11 @@ export function Ecosystem() {
 
         <li>
           <EcosystemCard
-            title="Instant HMR"
+            title="Hot Module Replacement"
             description={
               <>
-                Experience lightning-fast Hot Module Replacement. State is
-                preserved across updates so you never lose your place while
-                iterating on complex UIs.
+                Hot Module Replacement preserves component state while source
+                files are updated during development.
               </>
             }
             illustration={HmrIllustration}
@@ -94,9 +93,9 @@ export function Ecosystem() {
             title="Scoped Context"
             description={
               <>
-                Type-safe dependency injection scoped to component subtrees.
-                Create isolated contexts that automatically clean up, with no
-                prop drilling or global singletons required.
+                Type-safe context values can be scoped to component subtrees.
+                Scoped data is cleaned up when its Provider leaves the component
+                tree.
               </>
             }
             illustration={ScopedContextIllustration}
@@ -105,8 +104,8 @@ export function Ecosystem() {
 
         <li>
           <EcosystemCard
-            title="Universal Rendering"
-            description="Write components once and render them anywhere. The same code runs in the browser, on the server, or in tests — powered by a pluggable renderer architecture."
+            title="Renderer architecture"
+            description="The core uses a pluggable renderer interface. Renderers can target the browser, the server, or other host environments."
             illustration={UniversalRenderingIllustration}
           />
         </li>

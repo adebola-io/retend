@@ -1,21 +1,21 @@
 ---
 title: 'Rendering Architecture (Advanced)'
-description: 'How Retend renders your interface to different platforms.'
+description: 'How Retend renders interfaces on different platforms.'
 ---
 
 # Rendering Architecture (Advanced)
 
-Retend is fundamentally platform-agnostic. The core library (`retend`) handles all the reactive logic, components, and state management, but it delegates the actual drawing of the interface to a **Renderer**.
+Retend separates reactive logic, components, and state management from platform-specific rendering. The core library (`retend`) delegates interface output to a **Renderer**.
 
-By swapping out the renderer, you can use Retend to build web applications (`retend-web`), generate static HTML (`retend-server`), or even theoretically drive native mobile interfaces!
+Different renderers support web applications (`retend-web`) and static HTML generation (`retend-server`). A renderer can also target another platform.
 
 ## How Renderers Work
 
-When Retend processes your JSX and reactive Cells, it calculates exactly what needs to change. It then calls methods on the _active renderer_ to actually make those changes.
+When Retend processes JSX and reactive Cells, it determines the required changes and calls methods on the _active renderer_ to apply them.
 
-1. **Decoupled Types**: The core framework maintains perfect TypeScript safety without knowing what a "Node" actually is. To the core framework, a node is just an opaque object. To `retend-web`, a node is a real `HTMLElement`. To `retend-server`, a node is a virtual DOM object (`VNode`, `VElement`, `VText`, etc.) that mimics the browser DOM API.
-2. **Global Context**: Retend tracks the active renderer in a global context. When you call `renderToDOM` from `retend-web`, it secretly sets the browser renderer as the active one before processing your application.
-3. **Reconciliation & Updates**: The core framework handles all the complex math of fine-grained reactivity and figuring out what changed in a list. It then gives the renderer very simple, precise commands (like "update the text of this node" or "append this child here").
+1. **Decoupled Types**: The core framework does not need to know the concrete type of a `Node`. It treats a node as an opaque object. In `retend-web`, a node is an `HTMLElement`; in `retend-server`, it is a virtual DOM object such as `VNode`, `VElement`, or `VText` that implements the relevant browser DOM API.
+2. **Global Context**: Retend stores the active renderer in a global context. `renderToDOM` from `retend-web` sets the browser renderer as active before processing the application.
+3. **Reconciliation & Updates**: The core framework handles fine-grained reactivity and list reconciliation, then sends the renderer commands such as updating a node's text or appending a child.
 
 ## Built-in Renderers
 
@@ -61,7 +61,7 @@ const html = renderToString(nodes, window);
 
 ### Custom Renderers
 
-You can implement the `Renderer` interface for custom targets. The experimental packages include examples:
+Implement the `Renderer` interface to target another platform. The experimental packages include these examples:
 
 - **CanvasRenderer**: Renders to HTML5 Canvas
 - **TerminalRenderer**: Renders to terminal UI
@@ -77,7 +77,7 @@ interface Capabilities {
 }
 ```
 
-These flags allow the framework to:
+The framework uses these flags to:
 
 - Skip incompatible code paths
 - Provide fallbacks for limited environments
@@ -85,7 +85,7 @@ These flags allow the framework to:
 
 ## The Renderer API
 
-Every renderer in the Retend ecosystem implements the `Renderer` interface. If you ever wanted to build a custom renderer (for example, to render Retend apps to an HTML5 Canvas, or to a command-line terminal UI), you would implement this exact interface.
+Every renderer in the Retend ecosystem implements the `Renderer` interface. A custom renderer for HTML5 Canvas or a command-line terminal UI must implement this interface.
 
 ### Renderer Types
 
@@ -170,8 +170,8 @@ interface ForCachedData<Node> {
 }
 ```
 
-The core framework handles the diffing algorithm and calls your renderer's `reconcile` with minimal, precise changes needed.
+The core framework handles the diffing algorithm and calls the renderer's `reconcile` method with the required changes.
 
 ---
 
-This separation of concerns is what keeps Retend's core incredibly small and focused, while allowing it to run flawlessly anywhere JavaScript can run!
+This separation keeps platform-specific behavior in renderers while the core handles reactive updates.

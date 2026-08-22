@@ -1,15 +1,15 @@
 ---
 title: 'Reactivity and Cells'
-description: 'Automatically update your UI when data changes using Cells.'
+description: 'Use Cells to update the interface when data changes.'
 ---
 
 # Reactivity and Cells
 
 ## What is Reactivity?
 
-When you build a web application, your data often changes over time. Whether a user clicks a button, a network request completes, or a background timer ticks, you want your user interface to automatically update to reflect the newest information. This automatic updating is what we call **reactivity**.
+Application data can change in response to user input, completed requests, or timers. **Reactivity** is the mechanism that updates the interface when this data changes.
 
-In Retend, reactivity is powered by **Cells**. A Cell is a simple container for your data. When the data inside a Cell changes, Retend automatically updates the exact parts of the screen where that Cell is used—nothing more, nothing less.
+Retend implements reactivity with **Cells**. A Cell stores a value and updates the rendered locations that use it when the value changes.
 
 You create a new reactive value using `Cell.source()`:
 
@@ -39,7 +39,7 @@ console.log(isOn.get()); // → true
 
 ## Using Cells in JSX
 
-Here's where things get interesting. When you use a Cell in your JSX, **pass the Cell itself, not its value**. Don't call `.get()`.
+When using a Cell in JSX, **pass the Cell itself, not its value**. Do not call `.get()` in the JSX expression.
 
 ```tsx
 import { Cell } from 'retend';
@@ -64,13 +64,13 @@ function ToggleSwitch() {
 }
 ```
 
-When you pass the Cell into JSX, Retend establishes a live connection. Every time you call `.set()`, Retend updates that exact text node in the rendered output. The `ToggleSwitch` function itself never runs again.
+Passing a Cell into JSX creates a binding to the rendered output. Each call to `.set()` updates the corresponding text node. The `ToggleSwitch` function does not run again.
 
 ---
 
 ## Derived Cells for Computed Values
 
-Often you have data that depends on other data. A `firstName` Cell and `lastName` Cell might need a `fullName` that stays in sync. That's where `Cell.derived()` comes in.
+Use `Cell.derived()` for a value computed from other Cells. For example, `fullName` can depend on `firstName` and `lastName`.
 
 ```tsx
 import { Cell } from 'retend';
@@ -87,7 +87,7 @@ function UserProfile() {
 }
 ```
 
-When you pass a function to `Cell.derived()`, Retend immediately runs it and watches which Cells get `.get()` called on them. That's your dependency list—automatically tracked. If either `firstName` or `lastName` changes, the `fullName` computation re-runs and updates everywhere it's used.
+`Cell.derived()` runs its function immediately and tracks the Cells read with `.get()`. Those reads form the dependency list. When either `firstName` or `lastName` changes, the function runs again and the derived value updates wherever it is used.
 
 ### Rules for Derived Cells
 
@@ -100,7 +100,7 @@ When you pass a function to `Cell.derived()`, Retend immediately runs it and wat
 
 ## Side Effects with `.listen()`
 
-Sometimes you need to run code when a Cell changes—logging, syncing to `localStorage`, or performing manual updates. That's what `.listen()` is for:
+Use `.listen()` to run code when a Cell changes, such as logging a value, synchronizing `localStorage`, or performing a manual update:
 
 ```tsx
 import { Cell } from 'retend';
@@ -117,4 +117,4 @@ Every time you call `.set()` on the Cell, your listener function runs with the n
 
 ---
 
-With Cells as your foundation, you're ready to build interactive interfaces.
+Cells can be used to build interactive interfaces.
