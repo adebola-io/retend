@@ -1,0 +1,53 @@
+{
+  "name": "retend-canvas-2d",
+  "version": "0.0.28",
+  "private": false,
+  "description": "Retend canvas bindings.",
+  "keywords": [
+    "javascript",
+    "tui"
+  ],
+  "homepage": "https://github.com/resuite/retend#readme",
+  "bugs": {
+    "url": "https://github.com/resuite/retend/issues"
+  },
+  "license": "MIT",
+  "author": "Adebola Akomolafe",
+  "repository": {
+    "type": "git",
+    "directory": "github.com/resuite/retend"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./main": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js"
+    },
+    "./worker": {
+      "types": "./dist/worker.d.ts",
+      "import": "./dist/worker.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/jsx-runtime/index.d.ts",
+      "import": "./dist/jsx-runtime/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "watch": "sh -c 'pnpm run build; while sleep 1; do if find source scripts -newer dist/index.js | grep -q .; then pnpm run build; fi; done'"
+  },
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.4"
+  },
+  "devDependencies": {
+    "retend": "workspace:*",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "retend": "*"
+  }
+}

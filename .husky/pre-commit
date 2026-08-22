@@ -1,5 +1,10 @@
-# Formatting works on all platforms.
-#
+# Format staged source files and re-stage any formatter changes.
+files="$(git diff --cached --name-only --diff-filter=ACMR -- '*.js' '*.jsx' '*.ts' '*.tsx' '*.mjs' '*.cjs' '*.mts' '*.cts')"
+if [ -n "$files" ]; then
+  pnpm exec oxfmt $files
+  git add $files
+fi
+
 # `pnpm lint` (oxlint) cannot run on Android/Termux: its JS-plugin support
 # allocates a 4 GiB, 2 GiB-aligned block per thread that Android's bionic
 # libc cannot satisfy, so oxlint panics with SIGABRT. Skip lint there; it
@@ -10,8 +15,7 @@
 # removing this skip. If it works, re-enable lint on all platforms.
 if [ -n "$ANDROID_ROOT" ] || [ "$(node -p 'process.platform' 2>/dev/null)" = "android" ]; then
   echo "Skipping pnpm lint on Android (oxlint JS-plugin allocator is unsupported on bionic)"
-  pnpm format
-  exit $?
+  exit 0
 fi
 
-pnpm format && pnpm lint
+pnpm lint

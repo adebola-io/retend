@@ -107,6 +107,31 @@ importers:
         specifier: ^6.2.1
         version: 6.4.1(@types/node@26.1.2)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)
 
+  experiments/retend-canvas-2d:
+    dependencies:
+      '@chenglou/pretext':
+        specifier: ^0.0.4
+        version: 0.0.4
+    devDependencies:
+      retend:
+        specifier: workspace:*
+        version: link:../../packages/retend
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
+
+  experiments/retend-canvas-examples:
+    devDependencies:
+      retend:
+        specifier: workspace:*
+        version: link:../../packages/retend
+      retend-canvas-2d:
+        specifier: workspace:*
+        version: link:../retend-canvas-2d
+      vite:
+        specifier: ^6.2.1
+        version: 6.4.1(@types/node@26.1.2)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)
+
   experiments/retend-opentui:
     dependencies:
       '@opentui/core':
@@ -339,6 +364,9 @@ importers:
       retend:
         specifier: workspace:*
         version: link:../packages/retend
+      retend-canvas-2d:
+        specifier: workspace:*
+        version: link:../experiments/retend-canvas-2d
       retend-server:
         specifier: workspace:*
         version: link:../packages/retend-server
@@ -375,6 +403,9 @@ packages:
   '@babel/runtime@7.28.6':
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
     engines: {node: '>=6.9.0'}
+
+  '@chenglou/pretext@0.0.4':
+    resolution: {integrity: sha512-FnPAFMid1/p1j2V2gRPUVBarGUIb2PhkkC9YNnTOfPtTDgHKh8siO8PP9pCxpFfYlcodWPJpE1UbSHGQqt8pQQ==}
 
   '@cloudflare/kv-asset-handler@0.4.2':
     resolution: {integrity: sha512-SIOD2DxrRRwQ+jgzlXCqoEFiKOFqaPjhnNTGKXSRLvp1HiOvapLaFG2kEr9dYQTYe8rKrd9uvDUzmAITeNyaHQ==}
@@ -4402,6 +4433,8 @@ snapshots:
   '@babel/helper-validator-identifier@7.28.5': {}
 
   '@babel/runtime@7.28.6': {}
+
+  '@chenglou/pretext@0.0.4': {}
 
   '@cloudflare/kv-asset-handler@0.4.2': {}
 

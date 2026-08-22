@@ -1,0 +1,17 @@
+{
+  "name": "retend-canvas-examples",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint -c .oxlintrc.json .",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "retend": "workspace:*",
+    "retend-canvas-2d": "workspace:*",
+    "vite": "^6.2.1"
+  }
+}
