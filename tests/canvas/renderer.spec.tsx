@@ -1,3 +1,4 @@
+import { createUnique } from 'retend';
 import {
   Length,
   Alignment,
@@ -13,6 +14,33 @@ import { createCanvasAndRenderer, render, pixelAt } from './setup.tsx';
 
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+describe('Unique rendering', () => {
+  it('moves the same instance without renderer save/restore hooks', async () => {
+    const UniqueRect = createUnique(() => (
+      <rect
+        style={{
+          width: Length.Px(20),
+          height: Length.Px(20),
+          backgroundColor: 'red',
+        }}
+      />
+    ));
+
+    const { renderer } = await render(() => (
+      <rect style={{ width: Length.Px(100), height: Length.Px(100) }}>
+        <UniqueRect id="shared" />
+        <UniqueRect id="shared" />
+      </rect>
+    ));
+
+    const parent = renderer.root.children[0] as any;
+    const renderedChildren = parent.children.filter(
+      (child: any) => child.constructor.name !== 'CanvasAnchor'
+    );
+    expect(renderedChildren).toHaveLength(1);
+  });
 });
 
 function pointerEvent(

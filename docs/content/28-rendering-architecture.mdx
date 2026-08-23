@@ -113,6 +113,7 @@ interface RendererTypes {
 | `createGroup()`                                    | Creates a logical group for fragments   | -                                                                                           | `Group`          |
 | `unwrapGroup(fragment)`                            | Flattens a group to nodes               | `fragment: Group`                                                                           | `Node[]`         |
 | `createGroupHandle(group)`                         | Creates stable handle for dynamic lists | `group: Group`                                                                              | `Handle`         |
+| `getHandleNodes(handle)`                           | Returns nodes associated with a handle  | `handle: Handle`                                                                            | `Node[]`         |
 | `write(handle, newContent)`                        | Replaces content in a handle            | `handle: Handle`, `newContent: Node[]`                                                      | `void`           |
 | `reconcile(handle, options)`                       | Efficiently updates a dynamic list      | `handle: Handle`, `options: ReconcilerOptions`                                              | `void`           |
 | `append(container, children)`                      | Attaches children to parent             | `parent: Node`, `children: Node \| Node[]`                                                  | `Node`           |
@@ -120,8 +121,6 @@ interface RendererTypes {
 | `isNode(child)`                                    | Checks if value is a valid node         | `child: any`                                                                                | `boolean`        |
 | `isGroup(child)`                                   | Checks if value is a group              | `child: any`                                                                                | `boolean`        |
 | `isActive(node)`                                   | Checks if node is active                | `node: Node`                                                                                | `boolean`        |
-| `save(handle)`                                     | Saves handle state for later restore    | `handle: Handle`                                                                            | `number`         |
-| `restore(id, handle)`                              | Restores handle state                   | `id: number`, `handle: Handle \| null`                                                      | `void`           |
 | `handleComponent(fn, props, snapshot?, fileData?)` | Executes a component                    | `fn: Function`, `props: any[]`, `snapshot?: StateSnapshot`, `fileData?: JSX.JSXDevFileData` | `Node \| Node[]` |
 
 ### Node Creation

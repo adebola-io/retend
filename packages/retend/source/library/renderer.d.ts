@@ -111,6 +111,8 @@ export interface Renderer<
   isActive(node: Node): boolean;
   /** Creates a stable reference (handle) to a group of nodes, enabling subsequent incremental updates. */
   createGroupHandle(group: Group): Handle;
+  /** Returns the nodes currently associated with a handle. */
+  getHandleNodes(handle: Handle): Node[];
   /** Synchronously replaces the current nodes associated with a handle with new content. */
   write(handle: Handle, newContent: Node[]): void;
   /** Efficiently updates the nodes associated with a handle by diffing them against a new list of items. */
@@ -122,10 +124,6 @@ export interface Renderer<
     snapshot?: StateSnapshot,
     fileData?: JSX.JSXDevFileData
   ): Node | Node[];
-  /** Saves the current state of a handle to the renderer's snapshot store. */
-  save(handle: Handle): number;
-  /** Restores a handle's state from the renderer's snapshot store. */
-  restore(id: number, handle: Handle | null): void;
 }
 
 /**

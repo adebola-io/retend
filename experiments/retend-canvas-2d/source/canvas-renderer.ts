@@ -284,6 +284,16 @@ export class CanvasRenderer implements CanvasRendererInterface {
     return [handleStart, handleEnd];
   }
 
+  getHandleNodes(handle: CanvasRange): CanvasNode[] {
+    const [start, end] = handle;
+    if (!start.parent || start.parent !== end.parent) return [];
+    const { children } = start.parent;
+    const startIndex = children.indexOf(start);
+    const endIndex = children.indexOf(end);
+    if (startIndex === -1 || endIndex === -1) return [];
+    return children.slice(startIndex + 1, endIndex);
+  }
+
   write(handle: CanvasRange, newContent: CanvasNode[]) {
     write(handle, newContent);
     this.requestRender();
@@ -365,15 +375,6 @@ export class CanvasRenderer implements CanvasRendererInterface {
     if (id === 0) return null;
 
     return this.nodeMap.get(id);
-  }
-
-  // Stubs.
-  save(): number {
-    throw new Error('Not implemented');
-  }
-
-  restore() {
-    throw new Error('Not implemented');
   }
 }
 

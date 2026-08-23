@@ -39,7 +39,7 @@ const UniqueScope = createScope('Unique');
  * @property {ReturnType<typeof useAwait>} pendingAwait
  * @property {(() => void) | undefined} render
  * @property {boolean} isStable
- * @property {number | null} idOfLastSavedHandle
+ * @property {unknown[] | null} retainedNodes
  */
 
 /**
@@ -106,16 +106,15 @@ export function onMove(callback) {
 }
 
 /**
+ * Retains the concrete nodes currently owned by the active Unique handle.
+ *
  * @param {UniqueCtx} inst
  * @param {Renderer<any>} renderer
- * @returns {number}
+ * @returns {unknown[]}
  */
-const save = (inst, renderer) => {
-  // if there is a last saved handle, there is a pending save that
-  // needs to be restored before saving again.
-  if (inst.idOfLastSavedHandle !== null) return inst.idOfLastSavedHandle;
-  // If there are pending restore function, we need to clear them
-  // before saving again.
+const retain = (inst, renderer) => {
+  if (inst.retainedNodes !== null) return inst.retainedNodes;
+
   for (const move of inst.moveFns) {
     try {
       const restoreFn = move();
@@ -124,8 +123,22 @@ const save = (inst, renderer) => {
       console.error(e);
     }
   }
+
   const handle = inst.journey[inst.journey.length - 1][0];
-  return renderer.save(handle);
+  inst.retainedNodes = renderer.getHandleNodes(handle);
+  return inst.retainedNodes;
+};
+
+/**
+ * @param {UniqueCtx} inst
+ * @param {Renderer<any>} renderer
+ * @param {any | null} handle
+ */
+const restore = (inst, renderer, handle) => {
+  const nodes = inst.retainedNodes;
+  if (nodes === null) return;
+  inst.retainedNodes = null;
+  if (handle) renderer.write(handle, nodes);
 };
 
 /** @param {UniqueCtx} inst */
@@ -294,7 +307,7 @@ export function createUnique(renderFn) {
           else commit();
         },
         isStable: false,
-        idOfLastSavedHandle: null,
+        retainedNodes: null,
       };
       instance = newInstance;
       instances.set(key, newInstance);
@@ -303,7 +316,7 @@ export function createUnique(renderFn) {
       instance.props.set(nextProps);
 
       // In the case where there are multiple awaiting instances, we
-      // have to keep resaving and re-restoring as we propagate to the last one.
+      // keep moving the retained nodes forward until the last location wins.
       const length = instance.journey.length;
       const move = () => {
         const instance = instances.get(key);
@@ -314,21 +327,17 @@ export function createUnique(renderFn) {
         if (length !== instance.journey.length || !instance.isStable) {
           // Next instance, when last instance is not yet stable.
           // Move the nodes, but do not run move effects.
+          instance.retainedNodes = renderer.getHandleNodes(previousHandle);
           instance.journey.push([handle, group, nextProps, fragmentCtx]);
-          instance.idOfLastSavedHandle = renderer.save(previousHandle);
-          renderer.restore(instance.idOfLastSavedHandle, handle);
-          instance.idOfLastSavedHandle = null;
+          restore(instance, renderer, handle);
         } else {
           // Next instance, when last instance is stable.
           // Move and run effects.
-          // If last instance was already disposed, it would have already
-          // run the moveFn effects, so all we need to do is restore. If it is an
-          // active instance however, we need to run both save() and restore()
-          // on the fly.
-          instance.idOfLastSavedHandle = save(instance, renderer);
+          // If the last instance was already disposed, retain() has already run
+          // its move effects. Otherwise retain and move the nodes now.
+          retain(instance, renderer);
           instance.journey.push([handle, group, nextProps, fragmentCtx]);
-          renderer.restore(instance.idOfLastSavedHandle, handle);
-          instance.idOfLastSavedHandle = null;
+          restore(instance, renderer, handle);
           // Yes this is not ideal, but abeg.
           // The correct place for this to run is in onSetup(),
           // after the subtree has been surely appended, but
@@ -360,7 +369,7 @@ export function createUnique(renderFn) {
 
     onSetup(() => {
       if (!instance.isStable) instance.isStable = true;
-      instance.idOfLastSavedHandle = null;
+      instance.retainedNodes = null;
 
       return () => {
         const hmrContext = __HMR_SYMBOLS.getHMRContext();
@@ -371,9 +380,7 @@ export function createUnique(renderFn) {
         }
         const isLastHandle =
           instance.journey[instance.journey.length - 1][0] === handle;
-        if (isLastHandle) {
-          instance.idOfLastSavedHandle = save(instance, renderer);
-        }
+        if (isLastHandle) retain(instance, renderer);
 
         const teardown = () => {
           const index = instance.journey.findIndex(([item]) => item === handle);
@@ -385,27 +392,19 @@ export function createUnique(renderFn) {
 
           if (instance.journey.length == 0) {
             // The Unique component's journey has ended, there are no more handles.
-            // Restoring to nothing helps flush the renderer state.
             instance.state.node.dispose();
-            if (instance.idOfLastSavedHandle !== null) {
-              renderer.restore(instance.idOfLastSavedHandle, null);
-              instance.idOfLastSavedHandle = null;
-            }
+            restore(instance, renderer, null);
             instances.delete(key);
           } else {
             // There is no forward handle to restore, so we restore to the last one in the journey.
             const [lastHandle, lastGroup, lastProps, lastFragmentCtx] =
               instance.journey[instance.journey.length - 1];
-            if (isLastHandle && instance.idOfLastSavedHandle !== null) {
+            if (isLastHandle && instance.retainedNodes !== null) {
               instance.props.set(lastProps);
               correlate(lastGroup, instance.logicalNodes, renderer, lastHandle);
-              renderer.restore(instance.idOfLastSavedHandle, lastHandle);
+              restore(instance, renderer, lastHandle);
               lastFragmentCtx?.invalidate();
               runRestoreFns(instance);
-              // Reset to indicate the saved state has been used and we're ready
-              // for a new save cycle. This allows save() to call moveFns in
-              // subsequent moves after runPendingSetupEffects() has been called.
-              instance.idOfLastSavedHandle = null;
             }
           }
         };

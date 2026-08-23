@@ -548,6 +548,16 @@ export class TerminalRenderer implements Renderer<TerminalRendererTypes> {
     return [start, end];
   }
 
+  getHandleNodes(handle: TerminalHandle): TerminalNode[] {
+    const [start, end] = handle;
+    if (!start.parent || start.parent !== end.parent) return [];
+    const { children } = start.parent;
+    const startIndex = children.indexOf(start);
+    const endIndex = children.indexOf(end);
+    if (startIndex === -1 || endIndex === -1) return [];
+    return children.slice(startIndex + 1, endIndex);
+  }
+
   createContainer(
     tagname: string,
     props: TerminalNodeProps = {}
@@ -662,10 +672,4 @@ export class TerminalRenderer implements Renderer<TerminalRendererTypes> {
   isNode(child: unknown): child is TerminalNode {
     return child instanceof BaseNode;
   }
-
-  save(_handle: TerminalHandle): number {
-    return 0;
-  }
-
-  restore(_id: number, _handle: TerminalHandle | null): void {}
 }

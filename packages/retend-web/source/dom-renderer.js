@@ -74,8 +74,6 @@ export class DOMRenderer {
   host;
   staticStyleIds = new Set();
 
-  #savedHandles = new Map();
-  #savedHandleId = 0;
   /** @type {HydrationContext | null} */
   #hydration = null;
   /** @param {Window} host */
@@ -136,13 +134,27 @@ export class DOMRenderer {
     hydration.frame = range.parentFrame;
 
     const handle = /** @type {DOMHandle} */ ([range.start, range.end]);
-    hydrationData(fragment).children = this.#getHandleNodes(handle);
+    hydrationData(fragment).children = this.#getHandleRangeNodes(handle);
     Object.assign(hydrationData(handle), {
       fragment,
       frame: range,
       phase: 1,
     });
     return handle;
+  }
+
+  /**
+   * @param {DOMHandle} handle
+   * @returns {Node[]}
+   */
+  getHandleNodes(handle) {
+    const nodes = [];
+    let node = handle[0].nextSibling;
+    while (node && node !== handle[1]) {
+      nodes.push(node);
+      node = node.nextSibling;
+    }
+    return nodes;
   }
 
   /**
@@ -193,33 +205,6 @@ export class DOMRenderer {
   }
 
   /**
-   * @param {DOMHandle} handle
-   * @returns {number}
-   */
-  save(handle) {
-    const id = this.#savedHandleId++;
-    const nodes = [];
-    let node = handle[0].nextSibling;
-    while (node && node !== handle[1]) {
-      nodes.push(node);
-      node = node.nextSibling;
-    }
-    this.#savedHandles.set(id, nodes);
-    return id;
-  }
-
-  /**
-   * @param {number} id
-   * @param {DOMHandle | null} handle
-   */
-  restore(id, handle) {
-    const nodes = this.#savedHandles.get(id);
-    if (!nodes) return;
-    this.#savedHandles.delete(id);
-    if (handle) this.write(handle, nodes);
-  }
-
-  /**
    * @param {DOMHandle} segment
    * @param {ReconcilerOptions<Node>} options
    */
@@ -244,7 +229,8 @@ export class DOMRenderer {
 
     const result = Ops.reconcile(segment, options, this);
     if (state?.fragment) {
-      hydrationData(state.fragment).children = this.#getHandleNodes(segment);
+      hydrationData(state.fragment).children =
+        this.#getHandleRangeNodes(segment);
     }
     return result;
   }
@@ -629,7 +615,7 @@ export class DOMRenderer {
    * @param {DOMHandle} handle
    * @returns {Node[]}
    */
-  #getHandleNodes(handle) {
+  #getHandleRangeNodes(handle) {
     /** @type {Node[]} */
     const nodes = [];
     for (
