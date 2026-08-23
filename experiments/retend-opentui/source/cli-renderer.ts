@@ -171,6 +171,16 @@ export class OpenTuiRenderer implements Renderer<OpenTuiRendererOptions> {
     return [handleStart, handleEnd];
   }
 
+  getHandleNodes(handle: RenderableRange): Renderable[] {
+    const [start, end] = handle;
+    if (!start.parent || start.parent !== end.parent) return [];
+    const children = start.parent.getChildren();
+    const startIndex = children.indexOf(start);
+    const endIndex = children.indexOf(end);
+    if (startIndex === -1 || endIndex === -1) return [];
+    return children.slice(startIndex + 1, endIndex);
+  }
+
   write(handle: RenderableRange, newContent: Renderable[]) {
     nodeOps.writeToRange(handle, newContent);
   }
@@ -187,15 +197,6 @@ export class OpenTuiRenderer implements Renderer<OpenTuiRendererOptions> {
 
   isActive(node: Renderable) {
     return nodeOps.isConnected(this.cliRenderer.root, node);
-  }
-
-  // Stubs.
-  save(): number {
-    throw new Error('Not implemented');
-  }
-
-  restore() {
-    throw new Error('Not implemented');
   }
 }
 

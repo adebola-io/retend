@@ -219,74 +219,32 @@ function measureScenario(
   return total / 2;
 }
 
-async function loadBaselineRenderer() {
-  try {
-    return (await import('../../tmp/retend-canvas-baseline/source/index.ts')) as unknown as CanvasModule;
-  } catch {
-    return null;
-  }
-}
-
 describe('canvas benchmark', () => {
-  it('compares current renderer against a baseline entry', async () => {
-    const baseline = await loadBaselineRenderer();
-    if (!baseline) return;
-
+  it('measures the current renderer across representative scenes', async () => {
     const current = await import('retend-canvas-2d');
     const report = {
       scenarios: {} as Record<
         string,
-        {
-          current: { nonInteractive: number; interactive: number };
-          baseline: { nonInteractive: number; interactive: number };
-          delta: { nonInteractive: number; interactive: number };
-        }
+        { nonInteractive: number; interactive: number }
       >,
-      totals: {
-        current: { nonInteractive: 0, interactive: 0 },
-        baseline: { nonInteractive: 0, interactive: 0 },
-        delta: { nonInteractive: 0, interactive: 0 },
-      },
+      totals: { nonInteractive: 0, interactive: 0 },
     };
 
     for (const scenario of scenarios) {
-      const currentNonInteractive = measureScenario(current, scenario, false);
-      const currentInteractive = measureScenario(current, scenario, true);
-      const baselineNonInteractive = measureScenario(baseline, scenario, false);
-      const baselineInteractive = measureScenario(baseline, scenario, true);
+      const nonInteractive = measureScenario(current, scenario, false);
+      const interactive = measureScenario(current, scenario, true);
 
       report.scenarios[scenario.name] = {
-        current: {
-          nonInteractive: currentNonInteractive,
-          interactive: currentInteractive,
-        },
-        baseline: {
-          nonInteractive: baselineNonInteractive,
-          interactive: baselineInteractive,
-        },
-        delta: {
-          nonInteractive: currentNonInteractive - baselineNonInteractive,
-          interactive: currentInteractive - baselineInteractive,
-        },
+        nonInteractive,
+        interactive,
       };
-
-      report.totals.current.nonInteractive += currentNonInteractive;
-      report.totals.current.interactive += currentInteractive;
-      report.totals.baseline.nonInteractive += baselineNonInteractive;
-      report.totals.baseline.interactive += baselineInteractive;
+      report.totals.nonInteractive += nonInteractive;
+      report.totals.interactive += interactive;
     }
-
-    report.totals.delta.nonInteractive =
-      report.totals.current.nonInteractive -
-      report.totals.baseline.nonInteractive;
-    report.totals.delta.interactive =
-      report.totals.current.interactive - report.totals.baseline.interactive;
 
     console.info(JSON.stringify(report, null, 2));
 
-    expect(report.totals.current.nonInteractive).toBeGreaterThan(0);
-    expect(report.totals.current.interactive).toBeGreaterThan(0);
-    expect(report.totals.baseline.nonInteractive).toBeGreaterThan(0);
-    expect(report.totals.baseline.interactive).toBeGreaterThan(0);
+    expect(report.totals.nonInteractive).toBeGreaterThan(0);
+    expect(report.totals.interactive).toBeGreaterThan(0);
   });
 });

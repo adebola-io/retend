@@ -44,8 +44,6 @@ import { VDocumentFragment, VNode } from './index.js';
 export class VDOMRenderer {
   staticStyleIds = new Set();
 
-  #savedHandles = new Map();
-  #savedHandleId = 0;
   /** @param {VDom.VWindow} host */
   constructor(host) {
     this.host = host;
@@ -80,38 +78,25 @@ export class VDOMRenderer {
   }
 
   /**
-   * @param {DOMHandle} segment
-   * @param {VDom.VNode[]} newContent
-   */
-  write(segment, newContent) {
-    return Ops.write(segment, newContent);
-  }
-
-  /**
    * @param {DOMHandle} handle
-   * @returns {number}
+   * @returns {VDom.VNode[]}
    */
-  save(handle) {
-    const id = this.#savedHandleId++;
+  getHandleNodes(handle) {
     const nodes = [];
     let node = handle[0].nextSibling;
     while (node && node !== handle[1]) {
       nodes.push(node);
       node = node.nextSibling;
     }
-    this.#savedHandles.set(id, nodes);
-    return id;
+    return nodes;
   }
 
   /**
-   * @param {number} id
-   * @param {DOMHandle | null} handle
+   * @param {DOMHandle} segment
+   * @param {VDom.VNode[]} newContent
    */
-  restore(id, handle) {
-    const nodes = this.#savedHandles.get(id);
-    if (!nodes) return;
-    this.#savedHandles.delete(id);
-    if (handle) this.write(handle, nodes);
+  write(segment, newContent) {
+    return Ops.write(segment, newContent);
   }
 
   /**
