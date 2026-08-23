@@ -346,7 +346,7 @@ const SNAPSHOT_KEY = Symbol('__ACTIVE_SCOPE_SNAPSHOT__');
  *
  * function ChildComponent() {
  *    const user = useScopeContext(UserInfoScope);
- *    return <p>User: {user.name}</p>
+ *    return <p>User: {user.name}</p>;
  * }
  * ```
  */
@@ -411,7 +411,7 @@ export function useScopeContext(Scope) {
     link = link.parent;
   }
 
-  if (!relatedScopeData) {
+  if (!link) {
     // @ts-expect-error: Vite types is not ingrained.
     if (import.meta.hot) {
       // In HMR, scopes can change referential identity.
@@ -546,7 +546,7 @@ function setState(snapshot) {
  * // Now, restore the scopes to the 'initialSnapshot' state for a specific operation
  * withState(initialSnapshot, () => {
  *   // Inside this callback, any useScopeContext calls will retrieve values
- *   // as they were when 'initialSnapshot' was captured.
+ *   // as they were when the 'initialSnapshot' state.
  *   console.log('Theme inside callback:', useScopeContext(ThemeScope));
  *   console.log('User inside callback:', useScopeContext(UserScope));
  * });
